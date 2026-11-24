@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Wealthy Health Bookings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* Owner dashboard. Same palette and type as the website: night, ember, linen. One family. */
+:root{
+  --night:#17100b;--card:#221711;--card2:#2b1d14;--line:rgba(239,229,214,.14);--fg:#efe5d6;--mut:rgba(239,229,214,.6);
+  --accent:#c27a47;--gold:#dcb67e;--ok:#8fbf9a;--bad:#e0846a;
+  --sans:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--night);color:var(--fg);font:400 15px/1.5 var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+input,select{font:inherit;color:inherit;background:none;border:0;border-bottom:1px solid var(--line);padding:.6em 0;width:100%;border-radius:0;color-scheme:dark}
+input:focus,select:focus{outline:0;border-bottom-color:var(--gold)}
+select option{background:#2b1d13;color:#efe5d6}
+label{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.6em;padding:.85em 1.5em;border:1px solid var(--line);border-radius:999px;text-decoration:none;
+  font:500 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;transition:background .3s,color .3s,border-color .3s,opacity .3s}
+.btn:hover{border-color:var(--fg)}
+.btn--solid{background:var(--fg);color:var(--night);border-color:var(--fg)}
+.btn--solid:hover{background:var(--accent);border-color:var(--accent)}
+.btn--ok{border-color:var(--ok);color:var(--ok)}.btn--ok:hover{background:var(--ok);color:var(--night)}
+.btn--bad{border-color:rgba(224,132,106,.5);color:var(--bad)}.btn--bad:hover{background:var(--bad);color:var(--night);border-color:var(--bad)}
+.btn[disabled]{opacity:.4;pointer-events:none}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(60vmax 40vmax at 50% 0,rgba(194,122,71,.25),transparent 60%)}
+.login__card{width:min(100%,400px);display:grid;gap:22px}
+.login h1{font:300 clamp(2rem,8vw,2.8rem)/1.05 var(--sans);letter-spacing:-.03em}
+.login h1 em{color:var(--gold);font-style:italic}
+.login small{color:var(--mut)}
+.err{color:var(--bad);font-size:13px;min-height:1.3em}
+
+/* app shell */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px clamp(16px,4vw,40px);background:rgba(23,16,11,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.brand{font:500 12px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase}
+.brand i{color:var(--gold);font-style:normal;opacity:.8}
+.live{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--mut)}
+.live::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 2.2s ease-in-out infinite}
+.live.off::before{background:var(--bad);animation:none}
+@keyframes pulse{50%{opacity:.35;transform:scale(1.3)}}
+main{max-width:980px;margin:0 auto;padding:clamp(18px,4vw,40px) clamp(16px,4vw,40px) 80px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.stat b{display:block;font:300 clamp(2rem,6vw,3rem)/1 var(--sans);letter-spacing:-.03em}
+.stat span{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+.stat.hot b{color:var(--accent)}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:22px;padding-bottom:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:.7em 1.2em;border:1px solid var(--line);border-radius:999px;font-size:13px;white-space:nowrap;transition:background .3s,color .3s}
+.tab[aria-selected="true"]{background:var(--fg);color:var(--night);border-color:var(--fg)}
+.tab em{font-style:normal;margin-left:6px;opacity:.65}
+.day{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin:26px 0 10px}
+.day:first-child{margin-top:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 20px;display:grid;gap:14px;margin-bottom:10px;animation:in .5s cubic-bezier(.22,1,.36,1) both}
+.card.fresh{border-color:var(--accent);box-shadow:0 0 0 3px rgba(194,122,71,.18)}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card__head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.time{font:300 clamp(1.6rem,5vw,2.2rem)/1 var(--sans);letter-spacing:-.03em}
+.time small{font-size:13px;letter-spacing:0;color:var(--mut);margin-left:8px}
+.pill{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;padding:.45em .9em;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.pill.new{color:var(--accent)}.pill.confirmed{color:var(--ok)}.pill.done{color:var(--mut)}.pill.cancelled,.pill.declined{color:var(--bad)}
+.svc{font-size:17px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 24px;font-size:14px}
+.meta div span{display:block;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.empty{color:var(--mut);padding:40px 0;text-align:center}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:grid;gap:18px;margin-bottom:14px}
+.panel h2{font:300 22px/1.1 var(--sans);letter-spacing:-.02em}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px 24px}
+.check{display:flex;gap:12px;align-items:flex-start;font-size:15px}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent)}
+.check span small{display:block;color:var(--mut);font-size:13px}
+.blk{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--line);font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);z-index:50;background:var(--fg);color:var(--night);padding:.9em 1.5em;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .4s,transform .6s cubic-bezier(.22,1,.36,1);max-width:92vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:520px){.stats{gap:8px}.stat{padding:12px 14px}.card{padding:16px}}
+</style>
+</head>
+<body>
+
+<div class="login" id="loginView">
+  <form class="login__card" id="loginForm">
+    <h1>Wealthy Health<br /><em>bookings</em></h1>
+    <div><label for="em">Email</label><input id="em" type="email" autocomplete="username" required /></div>
+    <div><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required /></div>
+    <p class="err" id="loginErr" role="alert"></p>
+    <button class="btn btn--solid" type="submit" id="loginBtn">Sign in</button>
+    <small id="cfgWarn" hidden>Add your Supabase URL and key at the top of this file's script first.</small>
+  </form>
+</div>
+
+<div id="appView" hidden>
+  <header class="top">
+    <span class="brand">Wealthy Health <i>· Bookings</i></span>
+    <span style="display:flex;align-items:center;gap:16px">
+      <span class="live" id="live">Live</span>
+      <button class="btn" id="signout" type="button">Sign out</button>
+    </span>
+  </header>
+  <main>
+    <div class="stats">
+      <div class="stat" id="stNew"><b>0</b><span>Need action</span></div>
+      <div class="stat"><b id="stToday">0</b><span>Today</span></div>
+      <div class="stat"><b id="stWeek">0</b><span>Next 7 days</span></div>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-t="new" aria-selected="true">Needs action<em id="cNew"></em></button>
+      <button class="tab" role="tab" data-t="up" aria-selected="false">Upcoming<em id="cUp"></em></button>
+      <button class="tab" role="tab" data-t="hist" aria-selected="false">History</button>
+      <button class="tab" role="tab" data-t="off" aria-selected="false">Time off</button>
+      <button class="tab" role="tab" data-t="set" aria-selected="false">Settings</button>
+    </div>
+    <div id="view"></div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+'use strict';
+/* ====== PASTE YOUR SUPABASE DETAILS (same as the website) ====== */
+var BACKEND={url:'',key:''};
+
+var $=function(s,r){return (r||document).querySelector(s)};
+var TZ='Africa/Gaborone';
+var session=null,bookings=[],blocks=[],settings=null,tab='new',known=null,fresh={},pollT=0,ctx=null,loadFails=0;
+
+/* ---------- helpers ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function fmtTime(iso){return new Date(iso).toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit'})}
+function dayKey(iso){return new Date(iso).toLocaleDateString('en-CA',{timeZone:TZ})}
+function dayLabel(key){
+  var t=dayKey(new Date().toISOString()),tm=dayKey(new Date(Date.now()+864e5).toISOString());
+  var d=new Date(key+'T12:00:00+02:00').toLocaleDateString('en-GB',{timeZone:TZ,weekday:'long',day:'numeric',month:'long'});
+  return key===t?'Today · '+d:key===tm?'Tomorrow · '+d:d;
+}
+function waNumber(p){var d=String(p).replace(/\D/g,'');if(d.indexOf('00')===0)d=d.slice(2);if(d.length===8)d='267'+d;if(d.length===9&&d[0]==='0')d='267'+d.slice(1);return d}
+function waLink(b){
+  var when=new Date(b.starts_at).toLocaleDateString('en-GB',{timeZone:TZ,weekday:'long',day:'numeric',month:'long'})+' at '+fmtTime(b.starts_at);
+  var first=b.customer_name.split(' ')[0],txt;
+  if(b.status==='confirmed')txt='Hi '+first+', your '+b.service+' on '+when+' is confirmed. Reference '+b.ref+'. See you then. Wealthy Health';
+  else if(b.status==='declined')txt='Hi '+first+', sorry, we cannot do '+when+'. Could we offer you another time? Reference '+b.ref+'. Wealthy Health';
+  else if(b.status==='cancelled')txt='Hi '+first+', your booking '+b.ref+' for '+when+' has been cancelled. Wealthy Health';
+  else txt='Hi '+first+', this is Wealthy Health about your booking '+b.ref+' for '+when+'.';
+  return 'https://wa.me/'+waNumber(b.customer_phone)+'?text='+encodeURIComponent(txt);
+}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},4000)}
+function beep(){
+  try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=880;
+    g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.25,ctx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.6);
+    o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.65)}catch(_){}
+}
+
+/* ---------- auth + api ---------- */
+function save(){try{localStorage.setItem('wh_admin',JSON.stringify(session))}catch(_){}}
+function loadSaved(){try{return JSON.parse(localStorage.getItem('wh_admin')||'null')}catch(_){return null}}
+function base(){return BACKEND.url.replace(/\/$/,'')}
+function auth(grant,body){
+  return fetch(base()+'/auth/v1/token?grant_type='+grant,{method:'POST',headers:{'apikey':BACKEND.key,'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error_description||j.msg||'Sign in failed');return j})});
+}
+function setSession(j){session={access:j.access_token,refresh:j.refresh_token};save()}
+function api(path,opt,retry){
+  opt=opt||{};
+  return fetch(base()+'/rest/v1/'+path,{method:opt.method||'GET',headers:{'apikey':BACKEND.key,'Authorization':'Bearer '+session.access,'Content-Type':'application/json','Prefer':opt.prefer||'return=minimal'},body:opt.body?JSON.stringify(opt.body):undefined})
+  .then(function(r){
+    if(r.status===401&&!retry&&session.refresh){
+      return auth('refresh_token',{refresh_token:session.refresh}).then(setSession).then(function(){return api(path,opt,true)});
+    }
+    if(!r.ok)throw new Error('http '+r.status);
+    return r.status===204||opt.prefer==='return=minimal'?null:r.json();
+  });
+}
+function signOut(){session=null;try{localStorage.removeItem('wh_admin')}catch(_){}clearTimeout(pollT);$('#appView').hidden=true;$('#loginView').hidden=false;document.title='Wealthy Health Bookings'}
+
+/* ---------- data ---------- */
+function load(first){
+  var since=new Date(Date.now()-45*864e5).toISOString();
+  return Promise.all([
+    api('bookings?select=*&starts_at=gte.'+encodeURIComponent(since)+'&order=starts_at.asc',{prefer:'return=representation'}),
+    api('blocks?select=*&ends_at=gte.'+encodeURIComponent(new Date().toISOString())+'&order=starts_at.asc',{prefer:'return=representation'}),
+    api('settings?id=eq.1&select=*',{prefer:'return=representation'})
+  ]).then(function(r){
+    loadFails=0;$('#live').textContent='Live';$('#live').classList.remove('off');
+    bookings=r[0]||[];blocks=r[1]||[];settings=(r[2]||[])[0]||{therapists:2,buffer_min:30,auto_confirm:false};
+    var ids={};bookings.forEach(function(b){ids[b.id]=1});
+    if(known){
+      var added=bookings.filter(function(b){return !known[b.id]&&b.status==='new'});
+      if(added.length){added.forEach(function(b){fresh[b.id]=1});beep();toast(added.length===1?'New booking: '+added[0].customer_name+', '+added[0].service:added.length+' new bookings');
+        try{if(document.hidden&&Notification.permission==='granted')new Notification('New booking',{body:added[0].customer_name+' · '+added[0].service})}catch(_){}}
+    }
+    known=ids;render();
+  }).catch(function(e){
+    loadFails++;$('#live').textContent='Offline, retrying';$('#live').classList.add('off');
+    if(first)toast('Could not load bookings. Check your connection.');
+  });
+}
+function poll(){clearTimeout(pollT);pollT=setTimeout(function(){load(false).then(poll)},20000)}
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&session)load(false)});
+
+/* ---------- render ---------- */
+function setStatus(id,status){
+  api('bookings?id=eq.'+id,{method:'PATCH',body:{status:status}}).then(function(){
+    bookings.forEach(function(b){if(String(b.id)===String(id))b.status=status});delete fresh[id];render();
+    toast(status==='confirmed'?'Confirmed. Tap "Tell customer" to message them.':'Updated');
+  }).catch(function(){toast('Could not update. Try again.')});
+}
+function card(b){
+  var end=fmtTime(b.ends_at),acts='';
+  if(b.status==='new')acts+='<button class="btn btn--ok" data-a="confirmed" data-id="'+b.id+'">Confirm</button><button class="btn btn--bad" data-a="declined" data-id="'+b.id+'">Decline</button>';
+  if(b.status==='confirmed')acts+='<a class="btn btn--solid" target="_blank" rel="noopener" href="'+waLink(b)+'">Tell customer ↗</a><button class="btn" data-a="done" data-id="'+b.id+'">Mark done</button><button class="btn btn--bad" data-a="cancelled" data-id="'+b.id+'">Cancel</button>';
+  if(b.status==='declined'||b.status==='cancelled')acts+='<a class="btn" target="_blank" rel="noopener" href="'+waLink(b)+'">Message ↗</a>';
+  if(b.status==='new')acts+='<a class="btn" target="_blank" rel="noopener" href="'+waLink(b)+'">Message ↗</a>';
+  acts+='<a class="btn" href="tel:'+esc(String(b.customer_phone).replace(/[^\d+]/g,''))+'">Call</a>';
+  var where=[b.setting,b.area].filter(Boolean).join(', ');
+  return '<article class="card'+(fresh[b.id]?' fresh':'')+'"><div class="card__head"><div><div class="time">'+fmtTime(b.starts_at)+'<small>to '+end+' · '+b.duration_min+' min</small></div>'+
+    '<div class="svc">'+esc(b.service)+(b.occasion?' · <span style="color:var(--gold)">'+esc(b.occasion)+'</span>':'')+'</div></div><span class="pill '+b.status+'">'+b.status+'</span></div>'+
+    '<div class="meta"><div><span>Customer</span>'+esc(b.customer_name)+' · '+esc(b.customer_phone)+'</div><div><span>Where</span>'+esc(where||'Studio')+'</div>'+
+    (b.address?'<div><span>Address / notes</span>'+esc(b.address)+'</div>':'')+'<div><span>Estimate · Ref</span>P'+esc(b.total)+' · '+esc(b.ref)+'</div></div>'+
+    '<div class="actions">'+acts+'</div></article>';
+}
+function grouped(list){
+  var out='',last='';
+  list.forEach(function(b){var k=dayKey(b.starts_at);if(k!==last){out+='<p class="day">'+dayLabel(k)+'</p>';last=k}out+=card(b)});
+  return out||'';
+}
+function render(){
+  var now=Date.now(),today=dayKey(new Date().toISOString());
+  var active=bookings.filter(function(b){return b.status==='new'||b.status==='confirmed'});
+  var needs=bookings.filter(function(b){return b.status==='new'});
+  var up=bookings.filter(function(b){return b.status==='confirmed'&&new Date(b.ends_at)>=now});
+  var hist=bookings.filter(function(b){return b.status==='done'||b.status==='cancelled'||b.status==='declined'||(b.status==='confirmed'&&new Date(b.ends_at)<now)}).slice().reverse();
+  $('#stNew b').textContent=needs.length;$('#stNew').classList.toggle('hot',needs.length>0);
+  $('#stToday').textContent=active.filter(function(b){return dayKey(b.starts_at)===today}).length;
+  $('#stWeek').textContent=active.filter(function(b){var t=new Date(b.starts_at).getTime();return t>=now-864e5&&t<=now+7*864e5}).length;
+  $('#cNew').textContent=needs.length?needs.length:'';$('#cUp').textContent=up.length?up.length:'';
+  document.title=(needs.length?'('+needs.length+') ':'')+'Wealthy Health Bookings';
+  var v=$('#view'),h='';
+  if(tab==='new')h=grouped(needs)||'<p class="empty">Nothing waiting. New requests appear here automatically.</p>';
+  else if(tab==='up')h=grouped(up)||'<p class="empty">No confirmed bookings coming up.</p>';
+  else if(tab==='hist')h=hist.map(card).join('')||'<p class="empty">No history yet.</p>';
+  else if(tab==='off'){
+    h='<form class="panel" id="blockForm"><h2>Block out time</h2><div class="row2">'+
+      '<div><label for="bd">Date</label><input id="bd" type="date" required /></div>'+
+      '<div><label for="bf">From</label><input id="bf" type="time" value="08:00" required /></div>'+
+      '<div><label for="bt">To</label><input id="bt" type="time" value="22:00" required /></div>'+
+      '<div><label for="br">Reason (optional)</label><input id="br" type="text" placeholder="Leave, public holiday" /></div></div>'+
+      '<div><button class="btn btn--solid" type="submit">Block this time</button></div><p class="err" id="blkErr"></p></form>'+
+      '<div class="panel"><h2>Upcoming time off</h2>'+(blocks.length?blocks.map(function(b){
+        return '<div class="blk"><span>'+dayLabel(dayKey(b.starts_at))+' · '+fmtTime(b.starts_at)+' to '+fmtTime(b.ends_at)+(b.reason?' · '+esc(b.reason):'')+'</span><button class="btn btn--bad" data-rm="'+b.id+'">Remove</button></div>'}).join(''):'<p class="empty" style="padding:10px 0">None. Customers can book any free time.</p>')+'</div>';
+  }else{
+    h='<form class="panel" id="setForm"><h2>Settings</h2><div class="row2">'+
+      '<div><label for="sT">Therapists working at once</label><input id="sT" type="number" min="1" max="50" value="'+esc(settings.therapists)+'" /></div>'+
+      '<div><label for="sB">Travel buffer (minutes)</label><input id="sB" type="number" min="0" max="180" step="5" value="'+esc(settings.buffer_min)+'" /></div></div>'+
+      '<label class="check" style="text-transform:none;letter-spacing:0;font-size:15px;color:var(--fg)"><input id="sA" type="checkbox" '+(settings.auto_confirm?'checked':'')+' /><span>Confirm bookings automatically<small>Off means you approve each request first.</small></span></label>'+
+      '<div><button class="btn btn--solid" type="submit">Save</button></div></form>';
+  }
+  v.innerHTML=h;
+  var bf=$('#blockForm');if(bf){$('#bd').value=today;bf.onsubmit=addBlock}
+  var sf=$('#setForm');if(sf)sf.onsubmit=saveSettings;
+}
+function addBlock(e){
+  e.preventDefault();
+  var d=$('#bd').value,f=$('#bf').value,t=$('#bt').value;
+  if(t<=f){$('#blkErr').textContent='The end time must be after the start time.';return}
+  api('blocks',{method:'POST',body:{starts_at:d+'T'+f+':00+02:00',ends_at:d+'T'+t+':00+02:00',reason:$('#br').value.trim()||null}})
+    .then(function(){toast('Time blocked');return load(false)}).catch(function(){$('#blkErr').textContent='Could not save. Try again.'});
+}
+function saveSettings(e){
+  e.preventDefault();
+  api('settings?id=eq.1',{method:'PATCH',body:{therapists:+$('#sT').value||1,buffer_min:+$('#sB').value||0,auto_confirm:$('#sA').checked}})
+    .then(function(){toast('Saved');return load(false)}).catch(function(){toast('Could not save. Try again.')});
+}
+
+/* ---------- events ---------- */
+$('#tabs').addEventListener('click',function(e){
+  var b=e.target.closest('.tab');if(!b)return;tab=b.dataset.t;
+  document.querySelectorAll('.tab').forEach(function(x){x.setAttribute('aria-selected',x===b)});render();
+});
+$('#view').addEventListener('click',function(e){
+  var a=e.target.closest('[data-a]');if(a){setStatus(a.dataset.id,a.dataset.a);return}
+  var r=e.target.closest('[data-rm]');if(r){api('blocks?id=eq.'+r.dataset.rm,{method:'DELETE'}).then(function(){toast('Removed');return load(false)}).catch(function(){toast('Could not remove.')})}
+});
+$('#signout').addEventListener('click',signOut);
+
+function enter(){
+  api('admins?select=user_id',{prefer:'return=representation'}).then(function(r){
+    if(!r||!r.length){$('#loginErr').textContent='This account is not set up as an owner.';signOut();$('#loginErr').textContent='This account is not set up as an owner.';return}
+    $('#loginView').hidden=true;$('#appView').hidden=false;
+    try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(_){}
+    load(true).then(poll);
+  }).catch(function(){$('#loginErr').textContent='Could not sign in. Check the address and try again.';signOut()});
+}
+$('#loginForm').addEventListener('submit',function(e){
+  e.preventDefault();$('#loginErr').textContent='';
+  var btn=$('#loginBtn');btn.disabled=true;btn.textContent='Signing in';
+  try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)()}catch(_){}
+  auth('password',{email:$('#em').value.trim(),password:$('#pw').value}).then(function(j){setSession(j);enter()})
+  .catch(function(er){$('#loginErr').textContent=/invalid/i.test(er.message)?'Wrong email or password.':er.message})
+  .then(function(){btn.disabled=false;btn.textContent='Sign in'});
+});
+if(!BACKEND.url||!BACKEND.key){$('#cfgWarn').hidden=false;$('#loginBtn').disabled=true}
+else{var sv=loadSaved();if(sv){session=sv;enter()}}
+})();
+</script>
+</body>
+</html>
