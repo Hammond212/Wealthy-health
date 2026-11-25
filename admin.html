@@ -229,7 +229,7 @@ function card(b){
   var where=[b.setting,b.area].filter(Boolean).join(', ');
   return '<article class="card'+(fresh[b.id]?' fresh':'')+'"><div class="card__head"><div><div class="time">'+fmtTime(b.starts_at)+'<small>to '+end+' · '+b.duration_min+' min</small></div>'+
     '<div class="svc">'+esc(b.service)+(b.occasion?' · <span style="color:var(--gold)">'+esc(b.occasion)+'</span>':'')+'</div></div><span class="pill '+b.status+'">'+b.status+'</span></div>'+
-    '<div class="meta"><div><span>Customer</span>'+esc(b.customer_name)+' · '+esc(b.customer_phone)+'</div><div><span>Where</span>'+esc(where||'Studio')+'</div>'+
+    '<div class="meta"><div><span>Customer</span>'+esc(b.customer_name)+' · '+esc(b.customer_phone)+'</div>'+(b.email?'<div><span>Email'+(b.marketing_opt_in?' · wants offers':'')+'</span><a href="mailto:'+esc(b.email)+'">'+esc(b.email)+'</a></div>':'')+'<div><span>Where</span>'+esc(where||'Studio')+'</div>'+
     (b.address?'<div><span>Address / notes</span>'+esc(b.address)+'</div>':'')+'<div><span>Estimate · Ref</span>P'+esc(b.total)+' · '+esc(b.ref)+'</div></div>'+
     '<div class="actions">'+acts+'</div></article>';
 }
