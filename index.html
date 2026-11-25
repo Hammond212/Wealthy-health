@@ -1120,9 +1120,9 @@ function next(){
   if(!live){var url=buildDone('wa');show('done','fwd');try{window.open(url,'_blank','noopener')}catch(_){}return}
   var btn=$('#fnext'),it=CATS[S.cat].items[S.t];
   btn.disabled=true;btn.firstChild.textContent='Sending ';
-  rpc('create_booking',{name:name,phone:phone,service:it[0],category:CATS[S.cat].full,duration:DURS[S.d],
+  rpc('create_booking',{p:{name:name,phone:phone,service:it[0],category:CATS[S.cat].full,duration:DURS[S.d],
     starts_at:S.date+'T'+S.time+':00+02:00',setting:SETTINGS[S.set],area:S.set===3?'':AREAS[S.area][0],
-    address:$('#addr').value.trim(),occasion:S.occ?OCC_FULL[S.occ]:'',total:total(),hp:$('#hp').value})
+    address:$('#addr').value.trim(),occasion:S.occ?OCC_FULL[S.occ]:'',total:total(),hp:$('#hp').value}})
   .then(function(r){
     btn.disabled=false;
     if(r&&r.ok){buildDone('saved',r);show('done','fwd');return}
