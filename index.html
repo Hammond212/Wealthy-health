@@ -613,7 +613,7 @@ var WA_NUMBER='26771000888';
 /* ====== BOOKING BACKEND (Supabase) ======
    Paste your Project URL and anon public key (Supabase > Project Settings > API).
    Leave both empty and the site works in WhatsApp-only mode. */
-var BACKEND={url:'',key:''};
+var BACKEND={url:'https://gmbmjnznnagqtwhquxeu.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYm1qbnpubmFncXR3aHF1eGV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1OTc4MjUsImV4cCI6MjExMTE3MzgyNX0.Oq8dCec2Ii4dHQWZX_IiKCqfSozxL2NFOKtn3JD58Mw'};
 var live=!!(BACKEND.url&&BACKEND.key);
 function rpc(fn,body){
   return fetch(BACKEND.url.replace(/\/$/,'')+'/rest/v1/rpc/'+fn,{method:'POST',
