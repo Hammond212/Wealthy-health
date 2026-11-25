@@ -15,7 +15,7 @@ All three are plain HTML/SQL. No build step, no frameworks.
 
 ## How it works
 
-1. A customer picks a service, then a date and time, then enters name and phone.
+1. A customer picks a service, then a date (calendar) and time (clock), then enters name, phone and email, and ticks the policy and terms box. A second optional box lets them opt in to offers and discounts.
 2. The site shows only free times and saves the booking to Supabase. The database blocks double bookings, even if two people book at the same moment.
 3. The owner opens `admin.html`, sees the request, and taps Confirm or Decline.
 4. "Tell customer" opens WhatsApp with a ready message. WhatsApp is only for talking to the customer, not for taking bookings.
@@ -72,3 +72,7 @@ Use the **Time off** tab to block holidays or leave.
 - Email: wealthyhealth44@gmail.com
 - Instagram: WealthyHealth.Bw
 - Facebook: wealthyhealth44
+
+## Policy and terms
+
+The text is in `index.html` (search `TERMS_HTML`). It is a starting draft: have the owner review and edit it before launch. The database stores whether each customer agreed and whether they opted in to offers, so the owner can see who to send offers to.
