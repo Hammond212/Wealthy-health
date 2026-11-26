@@ -80,3 +80,34 @@ The text is in `index.html` (search `TERMS_HTML`). It is a starting draft: have 
 ## Chat assistant
 
 A chat bubble (bottom right) answers common questions from the site's own data: services, prices, areas and travel fees, hours, cancellation, payment. It reads `CATS`, `AREAS` and `WA_NUMBER`, so it updates when you edit those. Unknown questions hand off to WhatsApp. The wording of the answers is in the `reply()` function near the end of `index.html`. It is not AI, so it only answers what is written there.
+
+---
+
+## New in this version
+
+**Reminders and cancellation policy.** The last booking step shows the cancellation rule (free up to 4 hours before, later may be charged). In the dashboard, Upcoming has a **Send reminder** button on every confirmed booking (opens WhatsApp with the message ready) and a banner for sessions in the next 36 hours not yet reminded. Send reminders the day before.
+
+**Health notes and boundaries.** Customers can add health notes when booking (pregnancy, injuries, allergies). You see them on the booking card in the dashboard. The "What to expect" section states what is and is not included.
+
+**Reviews.** Customers send reviews from the site. They stay hidden until you open the dashboard, go to **Reviews**, and tap **Show on website**. No review is ever fake or pre-filled.
+
+**Gift vouchers and packages.** Customers request a voucher (P300, P500, P800, P1200) or a package (3 sessions save 5%, 5 sessions save 10%). In the dashboard **Vouchers** tab: Send payment details, then Mark paid, then Issue code, then Send code. Edit amounts or discounts in `index.html` (search `var AM=` and `G.n===5?.10:.05`). Voucher terms (6 months, no cash exchange) are in the terms text; change them if your rules differ.
+
+**Database.** Run the new `setup.sql` once more in Supabase SQL Editor (already applied to the live project).
+
+## Get found on Google (about 20 minutes)
+
+1. Go to business.google.com and create a **Business Profile** called Wealthy Health.
+2. Choose **Spa** or **Massage therapist** as the category. Add Beauty salon and Health spa as extras.
+3. Pick **Service area business** (you travel to customers). Hide any street address. Add Gaborone and the areas you serve.
+4. Hours: daily 08:00 to 22:00. Phone: +267 75 945 724. Website: https://hammond212.github.io/Wealthy-health/
+5. Add 5 to 10 real photos (treatments, setup, products). No stock photos.
+6. Add each service with its price. Ask every happy client for a Google review (send the review link by WhatsApp after their session).
+7. Put the same website link in your Instagram and Facebook bios.
+8. In Google Search Console, add the site and submit `sitemap.xml`.
+
+The site already has search tags, a social sharing preview and structured business data for Google. Put your own photo in the `<meta property="og:image">` tag later for a nicer link preview.
+
+## Chat assistant: saved questions and low data use
+
+Answers are worked out on the visitor's phone (no network, no AI cost) and repeat questions reuse a cached answer. Typed questions are cleaned of phone numbers and emails, counted on the device, and sent in one small batch (at most every 3 minutes, or when the chat closes). Open the dashboard **Questions** tab to see what clients ask most. Gold lines are questions the assistant could not answer: add those to the website or services. The dashboard also fetches reviews, vouchers, settings and time off only when you open their tab or every 5 minutes, so it uses less data. Approved reviews are cached on the visitor's device for 10 minutes.
