@@ -121,6 +121,9 @@ main{max-width:980px;margin:0 auto;padding:clamp(18px,4vw,40px) clamp(16px,4vw,4
       <button class="tab" role="tab" data-t="new" aria-selected="true">Needs action<em id="cNew"></em></button>
       <button class="tab" role="tab" data-t="up" aria-selected="false">Upcoming<em id="cUp"></em></button>
       <button class="tab" role="tab" data-t="hist" aria-selected="false">History</button>
+      <button class="tab" role="tab" data-t="rev" aria-selected="false">Reviews<em id="cRev"></em></button>
+      <button class="tab" role="tab" data-t="gv" aria-selected="false">Vouchers<em id="cGv"></em></button>
+      <button class="tab" role="tab" data-t="qs" aria-selected="false">Questions</button>
       <button class="tab" role="tab" data-t="off" aria-selected="false">Time off</button>
       <button class="tab" role="tab" data-t="set" aria-selected="false">Settings</button>
     </div>
@@ -137,7 +140,7 @@ var BACKEND={url:'https://gmbmjnznnagqtwhquxeu.supabase.co',key:'eyJhbGciOiJIUzI
 
 var $=function(s,r){return (r||document).querySelector(s)};
 var TZ='Africa/Gaborone';
-var session=null,bookings=[],blocks=[],settings=null,tab='new',known=null,fresh={},pollT=0,ctx=null,loadFails=0;
+var session=null,lastX=0,questions=[],bookings=[],reviews=[],vouchers=[],blocks=[],settings=null,tab='new',known=null,fresh={},pollT=0,ctx=null,loadFails=0;
 
 /* ---------- helpers ---------- */
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -156,6 +159,11 @@ function waLink(b){
   else if(b.status==='declined')txt='Hi '+first+', sorry, we cannot do '+when+'. Could we offer you another time? Reference '+b.ref+'. Wealthy Health';
   else if(b.status==='cancelled')txt='Hi '+first+', your booking '+b.ref+' for '+when+' has been cancelled. Wealthy Health';
   else txt='Hi '+first+', this is Wealthy Health about your booking '+b.ref+' for '+when+'.';
+  return 'https://wa.me/'+waNumber(b.customer_phone)+'?text='+encodeURIComponent(txt);
+}
+function waRemind(b){
+  var when=new Date(b.starts_at).toLocaleDateString('en-GB',{timeZone:TZ,weekday:'long',day:'numeric',month:'long'})+' at '+fmtTime(b.starts_at);
+  var txt='Hi '+b.customer_name.split(' ')[0]+', a friendly reminder of your '+b.service+' with Wealthy Health on '+when+'. Please reply YES to confirm. You can change or cancel free up to 4 hours before; later cancellations or no-shows may be charged. Ref '+b.ref+'.';
   return 'https://wa.me/'+waNumber(b.customer_phone)+'?text='+encodeURIComponent(txt);
 }
 function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},4000)}
@@ -190,11 +198,19 @@ function signOut(){session=null;try{localStorage.removeItem('wh_admin')}catch(_)
 /* ---------- data ---------- */
 function load(first){
   var since=new Date(Date.now()-45*864e5).toISOString();
+  /* low egress: bookings every poll; the rest only when first loaded, when its tab is open, or every 5 minutes */
+  var slow=first||!lastX||Date.now()-lastX>3e5||tab==='rev'||tab==='gv'||tab==='off'||tab==='set'||tab==='qs';
+  if(slow)lastX=Date.now();
   return Promise.all([
     api('bookings?select=*&starts_at=gte.'+encodeURIComponent(since)+'&order=starts_at.asc',{prefer:'return=representation'}),
-    api('blocks?select=*&ends_at=gte.'+encodeURIComponent(new Date().toISOString())+'&order=starts_at.asc',{prefer:'return=representation'}),
-    api('settings?id=eq.1&select=*',{prefer:'return=representation'})
+    slow?api('blocks?select=*&ends_at=gte.'+encodeURIComponent(new Date().toISOString())+'&order=starts_at.asc',{prefer:'return=representation'}):Promise.resolve(blocks),
+    slow?api('settings?id=eq.1&select=*',{prefer:'return=representation'}):Promise.resolve(settings?[settings]:[]),
+    slow?api('reviews?select=*&order=created_at.desc&limit=100',{prefer:'return=representation'}).catch(function(){return reviews}):Promise.resolve(reviews),
+    slow?api('voucher_requests?select=*&order=created_at.desc&limit=100',{prefer:'return=representation'}).catch(function(){return vouchers}):Promise.resolve(vouchers),
+    tab==='qs'?api('chat_questions?select=*&order=asks.desc&limit=200',{prefer:'return=representation'}).catch(function(){return questions}):Promise.resolve(questions)
   ]).then(function(r){
+    questions=r[5]||[];
+    reviews=r[3]||[];vouchers=r[4]||[];
     loadFails=0;$('#live').textContent='Live';$('#live').classList.remove('off');
     bookings=r[0]||[];blocks=r[1]||[];settings=(r[2]||[])[0]||{therapists:2,buffer_min:30,auto_confirm:false};
     var ids={};bookings.forEach(function(b){ids[b.id]=1});
@@ -222,7 +238,7 @@ function setStatus(id,status){
 function card(b){
   var end=fmtTime(b.ends_at),acts='';
   if(b.status==='new')acts+='<button class="btn btn--ok" data-a="confirmed" data-id="'+b.id+'">Confirm</button><button class="btn btn--bad" data-a="declined" data-id="'+b.id+'">Decline</button>';
-  if(b.status==='confirmed')acts+='<a class="btn btn--solid" target="_blank" rel="noopener" href="'+waLink(b)+'">Tell customer ↗</a><button class="btn" data-a="done" data-id="'+b.id+'">Mark done</button><button class="btn btn--bad" data-a="cancelled" data-id="'+b.id+'">Cancel</button>';
+  if(b.status==='confirmed')acts+='<a class="btn btn--solid" target="_blank" rel="noopener" href="'+waLink(b)+'">Tell customer ↗</a><a class="btn'+(b.reminded_at?'':' btn--ok')+'" target="_blank" rel="noopener" data-remind="'+b.id+'" href="'+waRemind(b)+'">'+(b.reminded_at?'Reminded ✓':'Send reminder ↗')+'</a><button class="btn" data-a="done" data-id="'+b.id+'">Mark done</button><button class="btn btn--bad" data-a="cancelled" data-id="'+b.id+'">Cancel</button>';
   if(b.status==='declined'||b.status==='cancelled')acts+='<a class="btn" target="_blank" rel="noopener" href="'+waLink(b)+'">Message ↗</a>';
   if(b.status==='new')acts+='<a class="btn" target="_blank" rel="noopener" href="'+waLink(b)+'">Message ↗</a>';
   acts+='<a class="btn" href="tel:'+esc(String(b.customer_phone).replace(/[^\d+]/g,''))+'">Call</a>';
@@ -230,7 +246,7 @@ function card(b){
   return '<article class="card'+(fresh[b.id]?' fresh':'')+'"><div class="card__head"><div><div class="time">'+fmtTime(b.starts_at)+'<small>to '+end+' · '+b.duration_min+' min</small></div>'+
     '<div class="svc">'+esc(b.service)+(b.occasion?' · <span style="color:var(--gold)">'+esc(b.occasion)+'</span>':'')+'</div></div><span class="pill '+b.status+'">'+b.status+'</span></div>'+
     '<div class="meta"><div><span>Customer</span>'+esc(b.customer_name)+' · '+esc(b.customer_phone)+'</div>'+(b.email?'<div><span>Email'+(b.marketing_opt_in?' · wants offers':'')+'</span><a href="mailto:'+esc(b.email)+'">'+esc(b.email)+'</a></div>':'')+'<div><span>Where</span>'+esc(where||'Studio')+'</div>'+
-    (b.address?'<div><span>Address / notes</span>'+esc(b.address)+'</div>':'')+'<div><span>Estimate · Ref</span>P'+esc(b.total)+' · '+esc(b.ref)+'</div></div>'+
+    (b.address?'<div><span>Address / notes</span>'+esc(b.address)+'</div>':'')+(b.health_notes?'<div style="grid-column:1/-1"><span style="color:var(--gold)">Health notes</span>'+esc(b.health_notes)+'</div>':'')+'<div><span>Estimate · Ref</span>P'+esc(b.total)+' · '+esc(b.ref)+'</div></div>'+
     '<div class="actions">'+acts+'</div></article>';
 }
 function grouped(list){
@@ -248,10 +264,34 @@ function render(){
   $('#stToday').textContent=active.filter(function(b){return dayKey(b.starts_at)===today}).length;
   $('#stWeek').textContent=active.filter(function(b){var t=new Date(b.starts_at).getTime();return t>=now-864e5&&t<=now+7*864e5}).length;
   $('#cNew').textContent=needs.length?needs.length:'';$('#cUp').textContent=up.length?up.length:'';
+  var pRev=reviews.filter(function(x){return !x.approved}).length,nGv=vouchers.filter(function(x){return x.status==='new'||x.status==='paid'}).length;
+  $('#cRev').textContent=pRev||'';$('#cGv').textContent=nGv||'';
   document.title=(needs.length?'('+needs.length+') ':'')+'Wealthy Health Bookings';
   var v=$('#view'),h='';
   if(tab==='new')h=grouped(needs)||'<p class="empty">Nothing waiting. New requests appear here automatically.</p>';
-  else if(tab==='up')h=grouped(up)||'<p class="empty">No confirmed bookings coming up.</p>';
+  else if(tab==='up'){
+    var due=up.filter(function(b){var t=new Date(b.starts_at).getTime();return !b.reminded_at&&t>now&&t<now+36*36e5}).length;
+    h=(due?'<p class="empty" style="padding:0 0 14px;color:var(--gold)">'+due+' session'+(due>1?'s':'')+' in the next 36 hours still need a reminder. Tap Send reminder.</p>':'')+(grouped(up)||'<p class="empty">No confirmed bookings coming up.</p>');
+  }
+  else if(tab==='qs'){
+    var tot=questions.reduce(function(a,x){return a+x.asks},0);
+    h='<div class="panel"><h2>What clients ask the assistant</h2><p class="empty" style="padding:0 0 12px;text-align:left">'+(questions.length?tot+' questions in total. <b style="color:var(--gold)">Gold</b> means the assistant had no answer: add that to the website or services.':'Nothing yet. Typed questions appear here, anonymously.')+'</p>'+
+      questions.map(function(x){var miss=x.misses>0;return '<div class="blk"><span>'+(miss?'<b style="color:var(--gold)">'+esc(x.q)+'</b>':esc(x.q))+'</span><span style="opacity:.7;white-space:nowrap">'+x.asks+'x · '+dayLabel(dayKey(x.last_at)).replace(/ ·.*/,'')+' <button class="btn btn--bad" data-qd="'+esc(x.q)+'" style="margin-left:8px">Delete</button></span></div>'}).join('')+
+      (questions.length?'<div style="margin-top:14px"><button class="btn btn--bad" data-qd="*">Clear all</button></div>':'')+'</div>';
+  }
+  else if(tab==='rev')h=reviews.map(function(x){
+    return '<article class="card"><div class="card__head"><div><div class="svc">'+'★★★★★'.slice(0,x.rating)+'☆☆☆☆☆'.slice(0,5-x.rating)+' · '+esc(x.name)+'</div></div><span class="pill '+(x.approved?'confirmed':'new')+'">'+(x.approved?'shown':'waiting')+'</span></div>'+
+      '<div class="meta"><div style="grid-column:1/-1">'+esc(x.body)+'</div></div><div class="actions">'+(x.approved?'<button class="btn" data-rv="hide" data-id="'+x.id+'">Hide</button>':'<button class="btn btn--ok" data-rv="show" data-id="'+x.id+'">Show on website</button>')+'<button class="btn btn--bad" data-rv="del" data-id="'+x.id+'">Delete</button></div></article>'}).join('')||'<p class="empty">No reviews yet. New ones wait here until you show them.</p>';
+  else if(tab==='gv')h=vouchers.map(function(v){
+    var ph=waNumber(v.buyer_phone),first=v.buyer_name.split(' ')[0],acts='';
+    if(v.status==='new')acts+='<a class="btn" target="_blank" rel="noopener" href="https://wa.me/'+ph+'?text='+encodeURIComponent('Hi '+first+', thank you for your '+(v.kind==='voucher'?'gift voucher':'package')+' request ('+v.ref+', P'+v.amount+'). Please pay by EFT, Orange Money or MyZaka and send proof here. We will then send your code. Wealthy Health')+'">Send payment details ↗</a><button class="btn btn--ok" data-vs="paid" data-id="'+v.id+'">Mark paid</button>';
+    if(v.status==='paid')acts+='<button class="btn btn--solid" data-vs="issued" data-id="'+v.id+'">Issue code</button>';
+    if(v.status==='issued'&&v.code)acts+='<a class="btn btn--solid" target="_blank" rel="noopener" href="https://wa.me/'+ph+'?text='+encodeURIComponent('Hi '+first+', your Wealthy Health '+(v.kind==='voucher'?'gift voucher':'package')+' is ready. Code: '+v.code+' ('+v.item+'). Valid 6 months. Book at hammond212.github.io/Wealthy-health or WhatsApp us and quote the code.')+'">Send code ↗</a>';
+    if(v.status!=='cancelled'&&v.status!=='issued')acts+='<button class="btn btn--bad" data-vs="cancelled" data-id="'+v.id+'">Cancel</button>';
+    return '<article class="card"><div class="card__head"><div><div class="svc">'+esc(v.item)+'</div></div><span class="pill '+(v.status==='issued'?'confirmed':v.status==='cancelled'?'declined':'new')+'">'+v.status+'</span></div>'+
+      '<div class="meta"><div><span>Buyer</span>'+esc(v.buyer_name)+' · '+esc(v.buyer_phone)+'</div><div><span>Email</span><a href="mailto:'+esc(v.buyer_email)+'">'+esc(v.buyer_email)+'</a></div>'+
+      (v.recipient_name?'<div><span>For</span>'+esc(v.recipient_name)+'</div>':'')+(v.message?'<div><span>Message</span>'+esc(v.message)+'</div>':'')+
+      '<div><span>Amount · Ref</span>P'+esc(v.amount)+' · '+esc(v.ref)+(v.code?' · code '+esc(v.code):'')+'</div></div><div class="actions">'+acts+'</div></article>'}).join('')||'<p class="empty">No voucher or package requests yet.</p>';
   else if(tab==='hist')h=hist.map(card).join('')||'<p class="empty">No history yet.</p>';
   else if(tab==='off'){
     h='<form class="panel" id="blockForm"><h2>Block out time</h2><div class="row2">'+
@@ -289,10 +329,20 @@ function saveSettings(e){
 /* ---------- events ---------- */
 $('#tabs').addEventListener('click',function(e){
   var b=e.target.closest('.tab');if(!b)return;tab=b.dataset.t;
-  document.querySelectorAll('.tab').forEach(function(x){x.setAttribute('aria-selected',x===b)});render();
+  document.querySelectorAll('.tab').forEach(function(x){x.setAttribute('aria-selected',x===b)});render();if(/^(qs|rev|gv)$/.test(tab))load(false);
 });
 $('#view').addEventListener('click',function(e){
   var a=e.target.closest('[data-a]');if(a){setStatus(a.dataset.id,a.dataset.a);return}
+  var qd=e.target.closest('[data-qd]');if(qd){var k=qd.dataset.qd;
+    api(k==='*'?'chat_questions?asks=gte.0':'chat_questions?q=eq.'+encodeURIComponent(k),{method:'DELETE'}).then(function(){questions=k==='*'?[]:questions.filter(function(x){return x.q!==k});render()}).catch(function(){toast('Could not delete.')});return}
+  var rm=e.target.closest('[data-remind]');if(rm){var id=rm.dataset.remind,ts=new Date().toISOString();
+    api('bookings?id=eq.'+id,{method:'PATCH',body:{reminded_at:ts}}).then(function(){bookings.forEach(function(b){if(String(b.id)===String(id))b.reminded_at=ts});setTimeout(render,400)}).catch(function(){});return}
+  var rv=e.target.closest('[data-rv]');if(rv){var rid=rv.dataset.id,act=rv.dataset.rv;
+    var q=act==='del'?api('reviews?id=eq.'+rid,{method:'DELETE'}):api('reviews?id=eq.'+rid,{method:'PATCH',body:{approved:act==='show'}});
+    q.then(function(){toast(act==='show'?'Now showing on the website':act==='hide'?'Hidden':'Deleted');return load(false)}).catch(function(){toast('Could not update.')});return}
+  var vs=e.target.closest('[data-vs]');if(vs){var vid=vs.dataset.id,st=vs.dataset.vs,body={status:st};
+    if(st==='issued')body.code='WH-'+Math.random().toString(36).slice(2,8).toUpperCase();
+    api('voucher_requests?id=eq.'+vid,{method:'PATCH',body:body}).then(function(){toast(st==='issued'?'Code issued. Tap Send code.':'Updated');return load(false)}).catch(function(){toast('Could not update.')});return}
   var r=e.target.closest('[data-rm]');if(r){api('blocks?id=eq.'+r.dataset.rm,{method:'DELETE'}).then(function(){toast('Removed');return load(false)}).catch(function(){toast('Could not remove.')})}
 });
 $('#signout').addEventListener('click',signOut);
