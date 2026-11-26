@@ -76,3 +76,7 @@ Use the **Time off** tab to block holidays or leave.
 ## Policy and terms
 
 The text is in `index.html` (search `TERMS_HTML`). It is a starting draft: have the owner review and edit it before launch. The database stores whether each customer agreed and whether they opted in to offers, so the owner can see who to send offers to.
+
+## Chat assistant
+
+A chat bubble (bottom right) answers common questions from the site's own data: services, prices, areas and travel fees, hours, cancellation, payment. It reads `CATS`, `AREAS` and `WA_NUMBER`, so it updates when you edit those. Unknown questions hand off to WhatsApp. The wording of the answers is in the `reply()` function near the end of `index.html`. It is not AI, so it only answers what is written there.
