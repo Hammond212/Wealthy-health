@@ -400,6 +400,43 @@ html:not([data-hero]) .hv-a{display:flex}
 .terms__h{font:300 26px/1.1 var(--sans);letter-spacing:-.02em}
 .terms__act{display:flex;gap:10px;flex-wrap:wrap}
 .clk__n.in{width:34px;height:34px;margin:-17px 0 0 -17px;font-size:13px}
+/* ============ CHAT ASSISTANT ============ */
+.cb{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:155;display:flex;align-items:center;gap:10px;
+  padding:.85em 1.3em;border-radius:999px;background:#efe5d6;color:#17100b;font:500 13px/1 var(--sans);letter-spacing:.04em;box-shadow:0 10px 40px rgba(0,0,0,.35);
+  transition:transform .5s var(--ease),opacity .3s}
+.cb svg{width:20px;height:20px}
+.cb:hover{transform:translateY(-2px)}.cb:active{transform:scale(.96)}
+.cb.gone{opacity:0;pointer-events:none;transform:translateY(20px)}
+.cp{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:160;width:min(380px,calc(100vw - 32px));height:min(600px,calc(100dvh - 32px));
+  display:flex;flex-direction:column;background:#1d130d;color:#efe5d6;border:1px solid rgba(239,229,214,.18);border-radius:26px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.55);
+  opacity:0;transform:translateY(24px) scale(.97);transform-origin:100% 100%;pointer-events:none;transition:opacity .35s var(--ease),transform .55s var(--ease)}
+.cp.on{opacity:1;transform:none;pointer-events:auto}
+.cp__h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid rgba(239,229,214,.12);background:radial-gradient(120% 140% at 0 0,rgba(194,122,71,.28),transparent 60%)}
+.cp__h b{display:block;font:500 12px/1 var(--sans);letter-spacing:.26em;text-transform:uppercase}
+.cp__h span{font-size:12px;opacity:.6}
+.cp__x{width:40px;height:40px;border:1px solid rgba(239,229,214,.2);border-radius:50%;font-size:20px;line-height:1;transition:border-color .3s}
+.cp__x:hover{border-color:#efe5d6}
+.cp__log{flex:1;overflow-y:auto;padding:16px 16px 6px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.cm{max-width:86%;padding:.7em 1em;border-radius:18px;font-size:14px;line-height:1.5;white-space:pre-line;animation:cmIn .45s var(--ease) both}
+.cm--b{align-self:flex-start;background:rgba(239,229,214,.09);border-bottom-left-radius:6px}
+.cm--u{align-self:flex-end;background:#efe5d6;color:#17100b;border-bottom-right-radius:6px}
+.cm--t{display:flex;gap:5px;padding:.9em 1em}
+.cm--t i{width:6px;height:6px;border-radius:50%;background:#efe5d6;opacity:.4;animation:cmDot 1s ease-in-out infinite}
+.cm--t i:nth-child(2){animation-delay:.15s}.cm--t i:nth-child(3){animation-delay:.3s}
+@keyframes cmIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes cmDot{50%{opacity:1;transform:translateY(-3px)}}
+.cp__q{display:flex;flex-wrap:wrap;gap:8px;padding:8px 16px 10px}
+.cq{padding:.55em 1em;border:1px solid rgba(239,229,214,.25);border-radius:999px;font-size:13px;transition:background .3s,color .3s,border-color .3s}
+.cq:hover{background:#efe5d6;color:#17100b;border-color:#efe5d6}
+.cq--a{background:#dcb67e;border-color:#dcb67e;color:#17100b}
+.cp__f{display:flex;gap:8px;padding:10px 12px 12px;border-top:1px solid rgba(239,229,214,.12)}
+.cp__f input{flex:1;min-width:0;background:rgba(239,229,214,.07);border:1px solid rgba(239,229,214,.15);border-radius:999px;padding:.8em 1.1em;font:400 15px/1.2 var(--sans);color:inherit;color-scheme:dark}
+.cp__f input:focus{outline:0;border-color:#dcb67e}
+.cp__f button{flex:none;width:46px;height:46px;border-radius:50%;background:#efe5d6;color:#17100b;display:grid;place-items:center;transition:background .3s}
+.cp__f button:hover{background:#dcb67e}
+.cp__f svg{width:18px;height:18px}
+@media (max-width:520px){.cp{right:0;bottom:0;width:100vw;height:min(78dvh,640px);border-radius:26px 26px 0 0}}
+@media (prefers-reduced-motion:reduce){.cm,.cm--t i{animation:none}}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:22px 30px}
 .f{display:flex;flex-direction:column;gap:2px;min-width:0}
 .f label{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;opacity:.6}
@@ -682,6 +719,21 @@ html:not([data-hero]) .hv-a{display:flex}
     <button type="button" class="btn btn--solid" id="fnext">Continue <span class="arr">→</span></button>
   </div>
 </div>
+
+<!-- ============ CHAT ASSISTANT ============ -->
+<button type="button" class="cb" id="cbOpen" aria-haspopup="dialog" aria-expanded="false" aria-controls="cbPanel">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/></svg>
+  <span>Ask us</span>
+</button>
+<section class="cp" id="cbPanel" role="dialog" aria-label="Wealthy Health assistant" aria-hidden="true">
+  <div class="cp__h"><div><b>Wealthy Health</b><span>Ask about services, prices and areas</span></div><button type="button" class="cp__x" id="cbClose" aria-label="Close chat">&times;</button></div>
+  <div class="cp__log" id="cbLog" role="log" aria-live="polite"></div>
+  <div class="cp__q" id="cbQuick"></div>
+  <form class="cp__f" id="cbForm" autocomplete="off">
+    <input id="cbInput" type="text" placeholder="Type your question" aria-label="Type your question" maxlength="200" />
+    <button type="submit" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
+  </form>
+</section>
 
 <script>
 (function(){
@@ -1296,6 +1348,128 @@ function onScroll(){
 }
 addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll)}},{passive:true});
 onScroll();
+
+/* ============ CHAT ASSISTANT (no AI, answers come from the site's own data) ============ */
+(function(){
+  var open=$('#cbOpen'),panel=$('#cbPanel'),log=$('#cbLog'),quick=$('#cbQuick'),form=$('#cbForm'),input=$('#cbInput'),started=false,busy=false;
+  var STOP='massage body full home professional wellness experience side with and the for at in of a an'.split(' ');
+  function waShow(){var n=WA_NUMBER.replace(/\D/g,'');return n.length>8?'+'+n.slice(0,3)+' '+n.slice(3,5)+' '+n.slice(5,8)+' '+n.slice(8):'+'+n}
+  function from(items,i){return Math.min.apply(null,items.map(function(x){return x[i]}))}
+  function words(t){return t.toLowerCase().replace(/&/g,' ').replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(Boolean)}
+  function findItems(q){
+    var qw=words(q),best=0,out=[];
+    var exact=[];CATS.forEach(function(c,ci){c.items.forEach(function(it,ii){if(q.toLowerCase().replace(/&/g,' ').replace(/\s+/g,' ').indexOf(it[0].toLowerCase().replace(/&/g,' ').replace(/\s+/g,' '))>=0)exact.push([ci,ii])})});
+    if(exact.length)return exact.slice(0,1);
+    CATS.forEach(function(c,ci){c.items.forEach(function(it,ii){
+      var sc=0;words(it[0]).forEach(function(w){if(w.length>=4&&STOP.indexOf(w)<0&&qw.some(function(x){return x===w||(x.length>=4&&(w.indexOf(x)===0||x.indexOf(w)===0))}))sc++});
+      if(sc>best){best=sc;out=[[ci,ii]]}else if(sc&&sc===best)out.push([ci,ii]);
+    })});
+    return best?out:[];
+  }
+  function findCat(q){
+    if(/mobile|come to|bring/.test(q)&&/spa/.test(q))return 1;
+    if(/\b(facials?|nails?|manicures?|pedicures?|wax|waxing|beauty|skin)\b/.test(q))return 2;
+    if(/\b(polish|scrubs?|wraps?|sculpt\w*|contour\w*|lymph\w*|body wellness)\b/.test(q))return 3;
+    if(/\bmassage|massages\b/.test(q))return 0;
+    return -1;
+  }
+  function priceLine(it){return it[0]+': '+fmt(it[1])+' (60 min), '+fmt(it[2])+' (90 min), '+fmt(it[3])+' (120 min)'}
+  function areaMatch(q){
+    var hit=[];
+    AREAS.forEach(function(a){a[0].toLowerCase().replace(/&/g,'·').split('·').forEach(function(p){p=p.trim();var w=p.split(/[\s\/]+/).filter(function(x){return x.length>=5});
+      if(w.some(function(x){return q.indexOf(x)>=0})&&hit.indexOf(a)<0)hit.push(a)})});
+    return hit;
+  }
+  function areasText(){
+    var free=[],paid={};
+    AREAS.forEach(function(a){if(!a[1])free.push(a[0]);else (paid[a[1]]=paid[a[1]]||[]).push(a[0])});
+    var t='We come to you. Travel is free in: '+free.join(', ')+'.';
+    Object.keys(paid).sort(function(a,b){return a-b}).forEach(function(f){t+='\n+'+fmt(+f)+' travel: '+paid[f].join(', ')+'.'});
+    return t+'\nNot on the list? Message us and we will check.';
+  }
+  var A={
+    book:{label:'Book now',fn:function(){closeChat();var r=open.getBoundingClientRect();openFlow({x:r.left+r.width/2,y:r.top+r.height/2,cat:null})}},
+    wa:function(q){return {label:'WhatsApp us',href:'https://wa.me/'+WA_NUMBER+(q?'?text='+encodeURIComponent('Hello Wealthy Health, '+q):'')}},
+    mail:{label:'Email us',href:'mailto:wealthyhealth44@gmail.com'}
+  };
+  var HOME=['Services and prices','Where do you travel?','Opening hours','Cancellation policy','How do I book?'];
+  function reply(q){
+    var l=q.toLowerCase().trim(),m;
+    if(/^(hi|hello|hey|hie|howzit|good (morning|afternoon|evening)|dumela|sawubona)\b/.test(l)&&l.split(' ').length<4)
+      return {t:'Hello, welcome to Wealthy Health. What would you like to know?',q:HOME};
+    if(/\b(thanks|thank you|cheers|ta)\b/.test(l))return {t:'You are welcome. Anything else I can help with?',q:['Services and prices','How do I book?'],a:[A.book]};
+    var items=findItems(l);
+    if(items.length===1&&!/\b(area|where|hours|cancel)\b/.test(l)){var it=CATS[items[0][0]].items[items[0][1]];
+      return {t:priceLine(it)+'.\n'+CATS[items[0][0]].line,q:['Other services','How do I book?'],a:[A.book]}}
+    if(items.length>1&&items.length<=4&&/price|cost|how much|rate|charge/.test(l))
+      return {t:items.map(function(x){return priceLine(CATS[x[0]].items[x[1]])}).join('\n'),a:[A.book]};
+    if(/\b(pregnan|pregnant|injur|allerg|medical|condition|diabet|pressure|surgery|health|safe|pain|sick)\b/.test(l))
+      return {t:'Please tell us about any medical condition, pregnancy, injury or allergy before your session. Our treatments are for relaxation and wellness, not medical care, and we may adjust a treatment for your safety. Message us if you are unsure.',a:[A.wa('I have a health question before booking.')]};
+    if(/\b(book|booking|reserve|appointment|schedule)\b/.test(l)&&!/cancel|change|resched/.test(l))
+      return {t:'Booking takes about a minute. Choose a service, pick a date and time, then add your details. We confirm by WhatsApp, phone or email.',a:[A.book]};
+    if(/\b(cancel|resched|refund|no.?show|postpone|change my)\b/.test(l))
+      return {t:'You can change or cancel free of charge up to 4 hours before your session. Later cancellations or no-shows may be charged. To change a booking, message us with your reference.',a:[A.wa('I need to change or cancel my booking.')]};
+    if(/\b(pay|payment|eft|orange|myzaka|card|cash|deposit|invoice)\b/.test(l))
+      return {t:'You pay after your session. We accept EFT, Orange Money, MyZaka, card and cash. No deposit is taken online.',q:['Services and prices']};
+    var am=areaMatch(l);
+    if(am.length&&!/price|cost|how much/.test(l))
+      return {t:am.map(function(a){return a[0]+': '+(a[1]?'travel is +'+fmt(a[1]):'no travel fee')+'.'}).join('\n')+'\nWe come to your home, hotel or office.',a:[A.book]};
+    if(/\b(area|areas|travel|location|located|where|come to|deliver|distance|far|address|studio|hotel|lodge|office)\b/.test(l))
+      return {t:areasText(),a:[A.wa('I would like to ask about my area.')]};
+    if(/\b(hour|hours|open|opening|close|closing|late|early|weekend|sunday|saturday|holiday|today|tomorrow)\b/.test(l))
+      return {t:'We work every day from 08:00 to 22:00 (Botswana time). Pick any free time in the booking calendar.',a:[A.book]};
+    if(/\b(how long|duration|minutes|mins|hour long|length)\b/.test(l)||/\b(60|90|120)\b/.test(l)&&!/p\d/.test(l))
+      return {t:'Every treatment comes in 60, 90 or 120 minutes. Longer sessions give you more time on each area, and the price goes up with the length.',q:['Services and prices']};
+    var ci=findCat(l);
+    if(ci>=0&&/price|cost|how much|rate|charge|from|menu|offer|have|do you/.test(l)||ci>=0&&l.split(' ').length<=3){var c=CATS[ci];
+      return {t:c.name+' ('+c.line+')\n'+c.items.map(function(x){return x[0]+': from '+fmt(x[1])}).join('\n')+'\nPrices are for 60 min. 90 and 120 min cost more.',a:[{label:'Book '+c.name.toLowerCase(),fn:function(){closeChat();var r=open.getBoundingClientRect();openFlow({x:r.left+r.width/2,y:r.top+r.height/2,cat:ci})}}]}}
+    if(/\b(price|prices|pricing|cost|how much|rates|charge|cheap|cheapest|afford|expensive|menu|service|services|treatment|treatments|offer|what do you)\b/.test(l)&&!/discount|promo|special|deal/.test(l))
+      return {t:CATS.map(function(c){return c.name+': from '+fmt(from(c.items,1))+' (60 min)'}).join('\n')+'\nTap a category to see every treatment.',q:CATS.map(function(c){return c.name}),a:[A.book]};
+    if(/\b(couple|couples|birthday|bridal|bride|wedding|group|groups|anniversary|corporate|team|recovery|marathon|event|occasion|party)\b/.test(l))
+      return {t:'We do special sessions for: '+OCC.join(', ')+'. Choose the occasion when you book, or message us for groups and larger events.',a:[A.book,A.wa('I would like to plan a special session.')]};
+    if(/\b(bring|prepare|preparation|provide|towel|table|linen|oils|music|setup|set up|space|need to)\b/.test(l))
+      return {t:'We bring everything: the massage table, linens, oils and music. You only need a clean, private space with room for the table.'};
+    if(/\b(discounts?|promos?|promotions?|specials?|deals?|vouchers?|gifts?|offers|offer me|sale)\b/.test(l))
+      return {t:'We send offers and discounts to customers who tick the "send me offers" box when booking. Follow us on Instagram (WealthyHealth.Bw) for news.',a:[A.book]};
+    if(/\b(contact|whatsapp|call|phone|number|email|mail|instagram|insta|facebook|reach|speak|human|owner|person)\b/.test(l))
+      return {t:'WhatsApp: '+waShow()+'\nEmail: wealthyhealth44@gmail.com\nInstagram: WealthyHealth.Bw\nFacebook: wealthyhealth44',a:[A.wa(''),A.mail]};
+    if(/\b(other services|more)\b/.test(l))
+      return {t:'Which category?',q:CATS.map(function(c){return c.name})};
+    return {t:'I am not sure about that one. Our team can answer you directly on WhatsApp.',q:HOME,a:[A.wa(q)]};
+  }
+  function add(cls,text){var d=document.createElement('div');d.className='cm '+cls;d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
+  function chips(list,acts){
+    quick.innerHTML='';
+    (acts||[]).forEach(function(a){
+      var e=a.href?document.createElement('a'):document.createElement('button');e.className='cq cq--a';e.textContent=a.label;
+      if(a.href){e.href=a.href;if(a.href.indexOf('http')===0){e.target='_blank';e.rel='noopener noreferrer'}}else{e.type='button';e.addEventListener('click',a.fn)}
+      quick.appendChild(e);
+    });
+    (list||[]).forEach(function(t){var b=document.createElement('button');b.type='button';b.className='cq';b.textContent=t;b.addEventListener('click',function(){ask(t)});quick.appendChild(b)});
+  }
+  function say(r){
+    var t=add('cm--b cm--t','');t.innerHTML='<i></i><i></i><i></i>';busy=true;quick.innerHTML='';
+    setTimeout(function(){t.className='cm cm--b';t.textContent=r.t;chips(r.q,r.a);busy=false;log.scrollTop=log.scrollHeight},reduce?0:550);
+  }
+  function ask(q){
+    q=(q||'').trim();if(!q||busy)return;
+    add('cm--u',q);input.value='';
+    say(reply(q));
+  }
+  function openChat(){
+    panel.classList.add('on');panel.setAttribute('aria-hidden','false');open.classList.add('gone');open.setAttribute('aria-expanded','true');
+    if(!started){started=true;say({t:'Hello, I am the Wealthy Health assistant. Ask me about services, prices, where we travel, or how to book.',q:HOME,a:[A.book]})}
+    setTimeout(function(){input.focus({preventScroll:true})},reduce?0:300);
+  }
+  function closeChat(){
+    panel.classList.remove('on');panel.setAttribute('aria-hidden','true');open.classList.remove('gone');open.setAttribute('aria-expanded','false');
+  }
+  open.addEventListener('click',openChat);
+  $('#cbClose').addEventListener('click',function(){closeChat();open.focus({preventScroll:true})});
+  form.addEventListener('submit',function(e){e.preventDefault();ask(input.value)});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&panel.classList.contains('on')&&!flow.classList.contains('open')){closeChat();open.focus({preventScroll:true})}});
+  window.__chatReply=reply;
+})();
 })();
 </script>
 </body>
