@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Sitemap: https://hammond212.github.io/Wealthy-health/sitemap.xml
