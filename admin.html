@@ -2,18 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#1b6fa8" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="WH Admin" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="robots" content="noindex,nofollow" />
 <title>Wealthy Health Bookings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
 /* Owner dashboard. Same palette and type as the website: night, ember, linen. One family. */
 :root{
-  --night:#f8f3ea;--card:#fffdf9;--card2:#f3ece0;--line:rgba(59,48,43,.14);--fg:#3b302b;--mut:rgba(59,48,43,.6);
-  --accent:#c98b73;--gold:#a8793f;--ok:#4f8a68;--bad:#b4573e;
-  --sans:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --night:#eef4f8;--card:#ffffff;--card2:#e3edf4;--line:rgba(18,40,58,.16);--fg:#12283a;--mut:rgba(18,40,58,.68);
+  --accent:#1b6fa8;--gold:#12557f;--ok:#1f7a4d;--bad:#b3402a;
+  --sans:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
   color-scheme:light;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -25,7 +33,7 @@ a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 input,select{font:inherit;color:inherit;background:none;border:0;border-bottom:1px solid var(--line);padding:.6em 0;width:100%;border-radius:0;color-scheme:light}
 input:focus,select:focus{outline:0;border-bottom-color:var(--gold)}
-select option{background:#3b302b;color:#3b302b}
+select option{background:#fff;color:#12283a}
 label{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.6em;padding:.85em 1.5em;border:1px solid var(--line);border-radius:999px;text-decoration:none;
   font:500 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;transition:background .3s,color .3s,border-color .3s,opacity .3s}
@@ -45,7 +53,7 @@ label{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercas
 .err{color:var(--bad);font-size:13px;min-height:1.3em}
 
 /* app shell */
-.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px clamp(16px,4vw,40px);background:rgba(248,243,234,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px clamp(16px,4vw,40px);background:rgba(238,244,248,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .brand{font:500 12px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase}
 .brand i{color:var(--gold);font-style:normal;opacity:.8}
 .live{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--mut)}
@@ -66,7 +74,7 @@ main{max-width:980px;margin:0 auto;padding:clamp(18px,4vw,40px) clamp(16px,4vw,4
 .day{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin:26px 0 10px}
 .day:first-child{margin-top:0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 20px;display:grid;gap:14px;margin-bottom:10px;animation:in .5s cubic-bezier(.22,1,.36,1) both}
-.card.fresh{border-color:var(--accent);box-shadow:0 0 0 3px rgba(201,139,115,.18)}
+.card.fresh{border-color:var(--accent);box-shadow:0 0 0 3px rgba(27,111,168,.18)}
 @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .card__head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .time{font:300 clamp(1.6rem,5vw,2.2rem)/1 var(--sans);letter-spacing:-.03em}
@@ -88,6 +96,24 @@ main{max-width:980px;margin:0 auto;padding:clamp(18px,4vw,40px) clamp(16px,4vw,4
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);z-index:50;background:var(--fg);color:var(--night);padding:.9em 1.5em;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .4s,transform .6s cubic-bezier(.22,1,.36,1);max-width:92vw;text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media (max-width:520px){.stats{gap:8px}.stat{padding:12px 14px}.card{padding:16px}}
+
+/* ===== installed app feel ===== */
+html{-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+body{padding-top:env(safe-area-inset-top)}
+.top{padding-top:calc(14px + env(safe-area-inset-top))}
+.top .btn{min-height:44px;padding:.5em 1.1em}
+.apbtn{display:none}
+.apbtn.show{display:inline-flex}
+.ioshint{display:none;margin:0 0 16px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);font-size:14px;color:var(--mut)}
+.ioshint.show{display:block}
+@media (max-width:720px){
+  main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(18,40,58,.1)}
+  .tab{min-height:46px;padding:.6em 1.1em;font-size:14px}
+  .toast{bottom:calc(90px + env(safe-area-inset-bottom))}
+}
+@media (display-mode:standalone){.ioshint,.apbtn{display:none!important}}
+.top .btn{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -108,10 +134,13 @@ main{max-width:980px;margin:0 auto;padding:clamp(18px,4vw,40px) clamp(16px,4vw,4
     <span class="brand">Wealthy Health <i>· Bookings</i></span>
     <span style="display:flex;align-items:center;gap:16px">
       <span class="live" id="live">Live</span>
+      <button class="btn btn--solid apbtn" id="alertsBtn" type="button">Turn on alerts</button>
+      <button class="btn apbtn" id="installBtn" type="button">Install app</button>
       <button class="btn" id="signout" type="button">Sign out</button>
     </span>
   </header>
   <main>
+    <p class="ioshint" id="iosHint">To install on iPhone: tap the Share button, then Add to Home Screen. Alerts work from the installed app.</p>
     <div class="stats">
       <div class="stat" id="stNew"><b>0</b><span>Need action</span></div>
       <div class="stat"><b id="stToday">0</b><span>Today</span></div>
@@ -217,7 +246,7 @@ function load(first){
     if(known){
       var added=bookings.filter(function(b){return !known[b.id]&&b.status==='new'});
       if(added.length){added.forEach(function(b){fresh[b.id]=1});beep();toast(added.length===1?'New booking: '+added[0].customer_name+', '+added[0].service:added.length+' new bookings');
-        try{if(document.hidden&&Notification.permission==='granted')new Notification('New booking',{body:added[0].customer_name+' · '+added[0].service})}catch(_){}}
+        notify('New booking',added[0].customer_name+', '+added[0].service+(added.length>1?' (+'+(added.length-1)+' more)':''))}
     }
     known=ids;render();
   }).catch(function(e){
@@ -267,6 +296,7 @@ function render(){
   var pRev=reviews.filter(function(x){return !x.approved}).length,nGv=vouchers.filter(function(x){return x.status==='new'||x.status==='paid'}).length;
   $('#cRev').textContent=pRev||'';$('#cGv').textContent=nGv||'';
   document.title=(needs.length?'('+needs.length+') ':'')+'Wealthy Health Bookings';
+  try{if(navigator.setAppBadge){needs.length?navigator.setAppBadge(needs.length):navigator.clearAppBadge()}}catch(_){}
   var v=$('#view'),h='';
   if(tab==='new')h=grouped(needs)||'<p class="empty">Nothing waiting. New requests appear here automatically.</p>';
   else if(tab==='up'){
@@ -347,11 +377,40 @@ $('#view').addEventListener('click',function(e){
 });
 $('#signout').addEventListener('click',signOut);
 
+
+/* ---------- installable app: service worker, install, alerts ---------- */
+var swReg=null,installEv=null;
+function notify(title,body){
+  try{
+    if(!('Notification' in window)||Notification.permission!=='granted')return;
+    if(navigator.vibrate)navigator.vibrate([120,60,120]);
+    if(swReg&&swReg.showNotification)swReg.showNotification(title,{body:body,icon:'icon-192.png',badge:'icon-192.png',tag:'wh-new',renotify:true});
+    else if(document.hidden)new Notification(title,{body:body,icon:'icon-192.png'});
+  }catch(_){}
+}
+function syncAlertsBtn(){
+  var b=$('#alertsBtn');if(!b)return;
+  b.classList.toggle('show','Notification' in window&&Notification.permission==='default');
+}
+function initApp(){
+  syncAlertsBtn();
+  var ios=/iphone|ipad|ipod/i.test(navigator.userAgent),standalone=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone;
+  if(ios&&!standalone)$('#iosHint').classList.add('show');
+}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();installEv=e;$('#installBtn').classList.add('show')});
+window.addEventListener('appinstalled',function(){installEv=null;$('#installBtn').classList.remove('show');toast('App installed')});
+$('#installBtn').addEventListener('click',function(){if(!installEv)return;installEv.prompt();installEv.userChoice.then(function(){installEv=null;$('#installBtn').classList.remove('show')})});
+$('#alertsBtn').addEventListener('click',function(){
+  try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)()}catch(_){}
+  Notification.requestPermission().then(function(p){syncAlertsBtn();toast(p==='granted'?'Alerts are on':'Alerts are blocked in your browser settings')})
+});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){})}
+
 function enter(){
   api('admins?select=user_id',{prefer:'return=representation'}).then(function(r){
     if(!r||!r.length){$('#loginErr').textContent='This account is not set up as an owner.';signOut();$('#loginErr').textContent='This account is not set up as an owner.';return}
     $('#loginView').hidden=true;$('#appView').hidden=false;
-    try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(_){}
+    initApp();
     load(true).then(poll);
   }).catch(function(){$('#loginErr').textContent='Could not sign in. Check the address and try again.';signOut()});
 }
