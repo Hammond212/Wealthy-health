@@ -556,16 +556,37 @@ function notify(title,body){
   try{
     if(!('Notification' in window)||Notification.permission!=='granted')return;
     if(navigator.vibrate)navigator.vibrate([120,60,120]);
-    if(swReg&&swReg.showNotification)swReg.showNotification(title,{body:body,icon:'icon-192.png',badge:'icon-192.png',tag:'wh-new',renotify:true});
+    if(swReg&&swReg.showNotification)swReg.showNotification(title,{body:body,icon:'icon-192.png',badge:'icon-192.png',tag:(title==='New booking'?'new-booking':'wh-'+title),renotify:true});
     else if(document.hidden)new Notification(title,{body:body,icon:'icon-192.png'});
   }catch(_){}
 }
+
+/* ---------- phone alerts when the app is closed (web push) ---------- */
+var VAPID_PUBLIC='BI5VvouyPY0zmDJlTEdVKGqRfBeYkDj6GV88PfVV_5zBxfKMNXtGTB9zwVnUmTVaighs0HRYpNp58ErwNXugmC4',pushOn=false;
+function b64u(s){var p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),r=atob(b),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
+function pushSupported(){return 'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window}
+function subscribePush(){
+  if(!pushSupported()||Notification.permission!=='granted')return Promise.resolve(false);
+  return navigator.serviceWorker.ready.then(function(reg){
+    swReg=reg;
+    return reg.pushManager.getSubscription().then(function(sub){return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUBLIC)})});
+  }).then(function(sub){
+    var j=sub.toJSON();
+    return api('rpc/save_push_sub',{method:'POST',body:{p:{endpoint:j.endpoint,keys:j.keys}}}).then(function(){pushOn=true;try{localStorage.setItem('wh_pushsaved',String(Date.now()))}catch(_){}return true});
+  }).catch(function(){return false});
+}
+function maybeResubscribe(){
+  if(!pushSupported()||Notification.permission!=='granted')return;
+  var last=0;try{last=+localStorage.getItem('wh_pushsaved')||0}catch(_){}
+  if(Date.now()-last>6*864e5)subscribePush();else pushOn=true;
+}
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data.push&&session)tick()});
 function syncAlertsBtn(){
   var b=$('#alertsBtn');if(!b)return;
   b.classList.toggle('show','Notification' in window&&Notification.permission==='default');
 }
 function initApp(){
-  syncAlertsBtn();
+  syncAlertsBtn();maybeResubscribe();
   var ios=/iphone|ipad|ipod/i.test(navigator.userAgent),standalone=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone;
   if(ios&&!standalone)$('#iosHint').classList.add('show');
 }
@@ -574,7 +595,7 @@ window.addEventListener('appinstalled',function(){installEv=null;$('#installBtn'
 $('#installBtn').addEventListener('click',function(){if(!installEv)return;installEv.prompt();installEv.userChoice.then(function(){installEv=null;$('#installBtn').classList.remove('show')})});
 $('#alertsBtn').addEventListener('click',function(){
   try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)()}catch(_){}
-  Notification.requestPermission().then(function(p){syncAlertsBtn();toast(p==='granted'?'Alerts are on':'Alerts are blocked in your browser settings')})
+  Notification.requestPermission().then(function(p){syncAlertsBtn();if(p!=='granted'){toast('Alerts are blocked in your browser settings');return}subscribePush().then(function(ok){toast(ok?'Phone alerts are on':'Alerts are on while the app is open')})})
 });
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){})}
 
@@ -610,6 +631,19 @@ function parseWhen(t){
   return null;
 }
 function whenText(d){return d.toLocaleString('en-GB',{timeZone:TZ,weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+
+function parseClock(t){
+  var m=t.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/)||t.match(/\b(\d{1,2}):(\d{2})()\b/)||t.match(/\bat (\d{1,2})()()\b/);
+  if(!m)return null;var h=+m[1],mi=+(m[2]||0);if(m[3]==='pm'&&h<12)h+=12;if(m[3]==='am'&&h===12)h=0;
+  if(h>23||mi>59)return null;return ('0'+h).slice(-2)+':'+('0'+mi).slice(-2);
+}
+var WD=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+function parseDay(t){
+  var m;if(/\btoday\b/.test(t))return keyPlus(0);if(/\btomorrow\b/.test(t))return keyPlus(1);
+  if((m=t.match(/\b(\d{4}-\d{2}-\d{2})\b/)))return m[1];
+  for(var i=0;i<WD.length;i++){if(new RegExp('\\b'+WD[i]+'\\b|\\b'+WD[i].slice(0,3)+'\\b').test(t)){for(var d=0;d<=7;d++){var k=keyPlus(d);if(new Date(k+'T12:00:00+02:00').getUTCDay()===i&&(d>0||/\b(today|this)\b/.test(t)||true))return d===0?keyPlus(7):k}}}
+  return null;
+}
 function periodOf(t){
   if(/\btoday\b/.test(t))return {a:dayStart(keyPlus(0)),b:dayStart(keyPlus(1)),n:'today'};
   if(/\btomorrow\b/.test(t))return {a:dayStart(keyPlus(1)),b:dayStart(keyPlus(2)),n:'tomorrow'};
@@ -623,13 +657,13 @@ function pickByName(t,list){
 }
 function checkRem(){
   var now=Date.now(),fired=false;
-  remList.forEach(function(r){if(!r.done&&r.at<=now){r.done=true;fired=true;notify('Reminder',r.text);try{beep()}catch(_){}toast('Reminder: '+r.text);asSay('<b>Reminder:</b> '+esc(r.text))}});
+  remList.forEach(function(r){if(!r.done&&r.at<=now){r.done=true;fired=true;if(r.db)api('owner_reminders?id=eq.'+r.db,{method:'PATCH',body:{sent:true}}).catch(function(){});if(document.hidden||!pushOn)notify('Reminder',r.text);try{beep()}catch(_){}toast('Reminder: '+r.text);asSay('<b>Reminder:</b> '+esc(r.text))}});
   if(fired)saveRem();
 }
 setInterval(checkRem,15000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)checkRem()});
 function goTab(name){var b=document.querySelector('.tab[data-t="'+name+'"]');if(b)b.click()}
-var HELP='<p><b>Things you can ask</b></p><ul><li>today, tomorrow, this week, needs action, next</li><li>find Neo</li><li>who needs a reminder</li><li>earnings this week, earnings this month</li><li>confirm all, confirm Neo, decline Neo</li><li>remind me at 5pm to call Neo</li><li>remind me in 30 minutes to check payments</li><li>my reminders, clear reminders</li><li>block tomorrow 14:00 to 16:00 lunch</li><li>sort by newest, sort by name, sort by time</li><li>open reviews, open vouchers, open settings</li></ul>';
+var HELP='<p><b>Things you can ask</b></p><ul><li>brief me</li><li>free time tomorrow, who is coming friday</li><li>move Neo to friday 3pm</li><li>Neo done, finish all past</li><li>history for Neo, who has not booked in a while</li><li>today, tomorrow, this week, needs action, next</li><li>find Neo</li><li>who needs a reminder</li><li>earnings this week, earnings this month</li><li>confirm all, confirm Neo, decline Neo</li><li>remind me at 5pm to call Neo</li><li>remind me in 30 minutes to check payments</li><li>my reminders, clear reminders</li><li>block tomorrow 14:00 to 16:00 lunch</li><li>sort by newest, sort by name, sort by time</li><li>open reviews, open vouchers, open settings</li></ul>';
 function handle(raw){
   var t=raw.toLowerCase().replace(/[?!.]+$/,'').replace(/\s+/g,' ').trim(),m;
   if(pendingAct){
@@ -640,6 +674,7 @@ function handle(raw){
   }
   if(!t)return '';
   if(/^(help|what can you do|commands)$/.test(t)||t==='?')return HELP;
+  if(/^(test|test alerts?|test notification|alerts?)$/.test(t)){notify('Test alert','If you can see this, alerts work on this device.');return pushOn?'Phone alerts are <b>on</b>. A test alert was sent to this device.':(pushSupported()?'Phone alerts are <b>off</b>. Open the menu and tap Turn on alerts.':'This browser cannot receive phone alerts. On iPhone, install the app first (Share, then Add to Home Screen).')}
   if(/^(hi|hello|hey)\b/.test(t))return 'Hello. Ask for today, tomorrow, needs action, or type help.';
   /* reminders */
   if(/^remind/.test(t)){
@@ -647,14 +682,15 @@ function handle(raw){
     var txt=raw.replace(/^\s*remind me\s*/i,'').replace(/\bin \d+\s*(min|mins|minutes?|hours?|hrs?|h)\b/i,'').replace(/\b(at|on)?\s*\d{1,2}(:\d{2})?\s*(am|pm)?\b/i,'').replace(/\b(tomorrow|today|at)\b/gi,'').replace(/^\s*(to|about)\s+/i,'').replace(/\s+(to|about)\s+/i,' ').replace(/\s+/g,' ').trim();
     if(!when)return 'When should I remind you? Try: remind me at 5pm to call Neo, or remind me in 30 minutes to check payments.';
     if(!txt)txt='Check bookings';
-    remList.push({id:Date.now(),at:when.getTime(),text:txt.charAt(0).toUpperCase()+txt.slice(1),done:false});saveRem();
-    return 'Done. I will remind you on '+whenText(when)+': <b>'+esc(txt)+'</b>.<br><small>Reminders ring while the app is open or running in the background on this device.</small>';
+    var rm={id:Date.now(),at:when.getTime(),text:txt.charAt(0).toUpperCase()+txt.slice(1),done:false};remList.push(rm);saveRem();
+    api('owner_reminders',{method:'POST',body:{at:when.toISOString(),text:rm.text},prefer:'return=representation'}).then(function(r){if(r&&r[0]){rm.db=r[0].id;saveRem()}}).catch(function(){});
+    return 'Done. I will remind you on '+whenText(when)+': <b>'+esc(txt)+'</b>.<br><small>It will ring on your phone within 5 minutes of that time, even if the app is closed.</small>';
   }
   if(/^(my )?reminders$/.test(t)||/^(show|list) (my )?reminders$/.test(t)){
     var act=remList.filter(function(r){return !r.done}).sort(function(a,b){return a.at-b.at});
     return act.length?'<p><b>Reminders ('+act.length+')</b></p>'+act.map(function(r){return '<div class="as__b"><span>'+esc(r.text)+'</span><em>'+whenText(new Date(r.at))+'</em></div>'}).join(''):'You have no reminders set.';
   }
-  if(/^clear (my )?reminders$/.test(t)){remList=[];saveRem();return 'All reminders cleared.'}
+  if(/^clear (my )?reminders$/.test(t)){remList=[];saveRem();api('owner_reminders?sent=eq.false',{method:'DELETE'}).catch(function(){});return 'All reminders cleared.'}
   /* navigation */
   if((m=t.match(/^(open|go to|show) (reviews?|vouchers?|questions|time off|settings|upcoming|history|needs action)$/))){
     var map={review:'rev',reviews:'rev',voucher:'gv',vouchers:'gv',questions:'qs','time off':'off',settings:'set',upcoming:'up',history:'hist','needs action':'new'};
@@ -679,6 +715,89 @@ function handle(raw){
       return 'Saving...';
     };
     return 'Block <b>'+dkey+'</b> from <b>'+tm[0]+'</b> to <b>'+tm[1]+'</b>'+(reason?' ('+esc(reason)+')':'')+'? Customers will not be able to book it.<div class="as__y"><button data-q="yes">Yes, block it</button><button data-q="no">No</button></div>';
+  }
+  /* ---- more commands ---- */
+  t=t.replace(/\b(tmrw|tmr|tomorow|tommorow|2moro)\b/g,'tomorrow').replace(/\bwho'?s\b/g,'who is').replace(/\bwhat'?s\b/g,'what is');
+  if(/^(brief( me)?|briefing|daily summary|summary|catch me up|good morning|morning)$/.test(t)){
+    var td=byDay(keyPlus(0)),tm2=byDay(keyPlus(1)),wt=bookings.filter(function(b){return b.status==='new'}),
+        dueR=bookings.filter(function(b){var s=new Date(b.starts_at).getTime();return b.status==='confirmed'&&!b.reminded_at&&s>Date.now()&&s<Date.now()+36*36e5}),
+        ps=periodOf('today'),inc=bookings.filter(function(b){var s=new Date(b.starts_at).getTime();return (b.status==='confirmed'||b.status==='done')&&s>=ps.a&&s<ps.b}).reduce(function(a,b){return a+(+b.total||0)},0),
+        myR=remList.filter(function(r){return !r.done&&r.at<Date.now()+864e5}).length;
+    return '<p><b>Your day</b></p><p>'+td.length+' session'+(td.length===1?'':'s')+' today (about P'+inc+'), '+tm2.length+' tomorrow.</p><p>'+wt.length+' request'+(wt.length===1?'':'s')+' waiting for you. '+dueR.length+' reminder'+(dueR.length===1?'':'s')+' to send. '+myR+' of your own reminder'+(myR===1?'':'s')+' in the next 24 hours.</p>'+(td.length?bkList(td,'Today'):'');
+  }
+  /* free time */
+  if(/\b(free|available|availability|open|gaps?|slots?)\b/.test(t)&&!/\b(voucher|review)\b/.test(t)){
+    var fk=parseDay(t)||keyPlus(0),grid=[];for(var hh=8;hh<=21;hh++){grid.push(('0'+hh).slice(-2)+':00');if(hh<21)grid.push(('0'+hh).slice(-2)+':30')}
+    api('rpc/available_slots',{method:'POST',body:{p_date:fk,p_duration:60,p_times:grid},prefer:'return=representation'}).then(function(r){
+      r=(r||[]).filter(function(x){return grid.indexOf(x)>-1}).sort();
+      if(!r.length){asSay('No free time on '+dayLabel(fk)+'.');return}
+      var ranges=[],a=r[0],p=r[0];
+      function nxt(x){var h=+x.slice(0,2),m=+x.slice(3);m+=30;if(m>=60){m-=60;h++}return ('0'+h).slice(-2)+':'+('0'+m).slice(-2)}
+      for(var i=1;i<=r.length;i++){if(r[i]!==nxt(p)){ranges.push(a===p?a:a+' to '+p);a=r[i];}p=r[i]}
+      asSay('<p><b>Free on '+dayLabel(fk)+'</b></p><p>A 60 minute session can start at: '+ranges.join(', ')+'.</p>');
+    }).catch(function(){asSay('Could not check free time. Try again.')});
+    return 'Checking '+dayLabel(fk)+'...';
+  }
+  /* mark done */
+  if((m=t.match(/^(?:mark|set)?\s*(.+?)\s+(?:as\s+)?(?:done|finished|completed|complete)$/))||(m=t.match(/^(?:done|finish|complete|finished)\s+(.+)$/))){
+    var who=m[1].replace(/^mark\s+/,'').trim(),isAll=/^(all|everything|all past|past|past sessions|all sessions|sessions)$/.test(who),now2=Date.now();
+    var cp=bookings.filter(function(b){return b.status==='confirmed'&&new Date(b.starts_at).getTime()<=now2+36e5});
+    var dsel=isAll?cp.filter(function(b){return new Date(b.ends_at).getTime()<now2}):pickByName(who,cp);
+    if(!dsel.length)return isAll?'No finished confirmed sessions to close.':'I could not find a confirmed session for "'+esc(who)+'" that has started.';
+    pendingAct=function(){
+      Promise.all(dsel.map(function(b){return api('bookings?id=eq.'+b.id,{method:'PATCH',body:{status:'done'}}).then(function(){b.status='done'})}))
+        .then(function(){render();asSay('Marked '+dsel.length+' session'+(dsel.length>1?'s':'')+' as done.')}).catch(function(){asSay('Some updates failed.')});
+      return 'Working on it...';
+    };
+    return 'Mark as done?'+dsel.map(bkLine).join('')+'<div class="as__y"><button data-q="yes">Yes</button><button data-q="no">No</button></div>';
+  }
+  /* reschedule */
+  if((m=t.match(/^(?:move|reschedule|change|shift|push)\s+(.+?)\s+(?:to|for|until|onto)\s+(.+)$/))){
+    var cand=pickByName(m[1],live().filter(function(b){return new Date(b.ends_at)>new Date()}));
+    if(!cand.length)return 'I could not find an upcoming booking for "'+esc(m[1])+'".';
+    if(cand.length>1)return 'That matches '+cand.length+' bookings. Add more of the name, or use the full name:'+cand.map(bkLine).join('');
+    var bk=cand[0],nk=parseDay(m[2])||dayKey(bk.starts_at),ck=parseClock(m[2]);
+    if(!ck)return 'What time? Example: move '+esc(bk.customer_name.split(' ')[0].toLowerCase())+' to friday 3pm.';
+    var dur=(new Date(bk.ends_at)-new Date(bk.starts_at)),ns=new Date(nk+'T'+ck+':00+02:00'),ne=new Date(ns.getTime()+dur);
+    if(ck<'08:00'||(ne.getTime()>new Date(nk+'T22:00:00+02:00').getTime()))return 'We work 08:00 to 22:00, and the session must end by 22:00.';
+    if(ns<new Date())return 'That time has already passed.';
+    var clash=live().filter(function(o){return o.id!==bk.id&&new Date(o.starts_at)<ne&&new Date(o.ends_at)>ns}).length>=((settings&&settings.therapists)||1);
+    var blk=blocks.some(function(o){return new Date(o.starts_at)<ne&&new Date(o.ends_at)>ns});
+    var waMsg='Hi '+bk.customer_name.split(' ')[0]+', your Wealthy Health session has been moved to '+ns.toLocaleString('en-GB',{timeZone:TZ,weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+'. Please reply to confirm that suits you. Thank you.';
+    pendingAct=function(){
+      api('bookings?id=eq.'+bk.id,{method:'PATCH',body:{starts_at:ns.toISOString(),ends_at:ne.toISOString(),reminded_at:null}}).then(function(){
+        bk.starts_at=ns.toISOString();bk.ends_at=ne.toISOString();bk.reminded_at=null;render();
+        asSay('Moved. <a class="as__a" target="_blank" rel="noopener" href="https://wa.me/'+waNumber(bk.customer_phone)+'?text='+encodeURIComponent(waMsg)+'">Tell '+esc(bk.customer_name.split(' ')[0])+' on WhatsApp</a>');
+      }).catch(function(){asSay('Could not move it. Try again.')});
+      return 'Working on it...';
+    };
+    return 'Move <b>'+esc(bk.customer_name)+'</b> from '+whenText(new Date(bk.starts_at))+' to <b>'+whenText(ns)+'</b>?'+((clash||blk)?'<p style="color:#b3402a"><b>Warning:</b> '+(blk?'that time is blocked.':'that time clashes with another booking.')+'</p>':'')+'<div class="as__y"><button data-q="yes">'+((clash||blk)?'Move anyway':'Yes, move it')+'</button><button data-q="no">No</button></div>';
+  }
+  /* customer history */
+  if((m=t.match(/^(?:history|visits|bookings|customer|client)\s+(?:for|of)?\s*(.+)$/))||(m=t.match(/^(.+?)\s+(?:history|visits)$/))||(m=t.match(/^how many times (?:has|have|did)\s+(.+?)\s+(?:book|booked|visit|visited|come|been|ordered)/))){
+    var qn=m[1].replace(/[^a-z0-9 ]/g,'').trim();
+    if(qn.length<2)return 'Whose history? Example: history for Neo.';
+    api('bookings?select=customer_name,customer_phone,starts_at,service,status,total&customer_name=ilike.*'+encodeURIComponent(qn)+'*&order=starts_at.desc&limit=80',{prefer:'return=representation'}).then(function(r){
+      r=(r||[]).filter(function(b){return b.status!=='cancelled'&&b.status!=='declined'});
+      if(!r.length){asSay('No bookings found for "'+esc(qn)+'".');return}
+      var g={};r.forEach(function(b){var k=waNumber(b.customer_phone);(g[k]=g[k]||[]).push(b)});
+      asSay(Object.keys(g).slice(0,4).map(function(k){var a=g[k],sv={};a.forEach(function(b){sv[b.service]=(sv[b.service]||0)+1});
+        var top=Object.keys(sv).sort(function(x,y){return sv[y]-sv[x]})[0],sp=a.reduce(function(s,b){return s+(+b.total||0)},0);
+        return '<p><b>'+esc(a[0].customer_name)+'</b></p><p>'+a.length+' booking'+(a.length===1?'':'s')+', last on '+dayLabel(dayKey(a[0].starts_at))+'. Favourite: '+esc(top)+'. About P'+sp+' in total (website estimates).</p>'}).join(''));
+    }).catch(function(){asSay('Could not load history. Try again.')});
+    return 'Looking up '+esc(qn)+'...';
+  }
+  /* customers who have gone quiet */
+  if(/(lapsed|haven.?t (been|booked|returned|come)|not (been|booked|come)( back)?( in| for)?|win ?back|come back|gone quiet|inactive|quiet customers|who (has )?stopped)/.test(t)){
+    var since2=new Date(Date.now()-365*864e5).toISOString();
+    api('bookings?select=customer_name,customer_phone,starts_at&status=in.(confirmed,done)&starts_at=gte.'+encodeURIComponent(since2)+'&order=starts_at.desc&limit=1000',{prefer:'return=representation'}).then(function(r){
+      var g={};(r||[]).forEach(function(b){var k=waNumber(b.customer_phone);if(!g[k])g[k]={n:b.customer_name,p:b.customer_phone,last:b.starts_at,c:0};g[k].c++});
+      var cut=Date.now()-60*864e5,list=Object.keys(g).map(function(k){return g[k]}).filter(function(x){return new Date(x.last).getTime()<cut}).sort(function(a,b){return b.c-a.c||new Date(b.last)-new Date(a.last)}).slice(0,10);
+      if(!list.length){asSay('Nobody has been away for more than 60 days.');return}
+      asSay('<p><b>Not booked for 60+ days</b></p>'+list.map(function(x){var f=x.n.split(' ')[0],msg='Hi '+f+', it has been a while since your last session with Wealthy Health. We would love to see you again. You can book any time at https://hammond212.github.io/Wealthy-health/ or just reply here.';
+        return '<div class="as__b"><span><b>'+esc(x.n)+'</b><br><small>'+x.c+' visit'+(x.c===1?'':'s')+', last '+dayLabel(dayKey(x.last))+'</small></span><a class="as__a" target="_blank" rel="noopener" href="https://wa.me/'+waNumber(x.p)+'?text='+encodeURIComponent(msg)+'">Message</a></div>'}).join(''));
+    }).catch(function(){asSay('Could not load customers. Try again.')});
+    return 'Checking customers...';
   }
   /* confirm / decline */
   if((m=t.match(/^(confirm|accept|decline|reject)\b(.*)$/))){
@@ -713,6 +832,7 @@ function handle(raw){
     var q=m[2],r=bookings.filter(function(b){return [b.customer_name,b.customer_phone,b.service,b.ref].join(' ').toLowerCase().indexOf(q)>-1});
     return r.length?bkList(r.slice(0,12),'Matches for '+esc(q)):'No bookings found for "'+esc(q)+'".';
   }
+  var gk=parseDay(t);if(gk)return bkList(byDay(gk),dayLabel(gk));
   return 'I did not understand that. Type <b>help</b> to see what I can do.';
 }
 function plain(h){var d=document.createElement('div');d.innerHTML=h.replace(/<\/(p|div|li)>/g,'. </$1>');return d.textContent.replace(/\s+/g,' ').replace(/\bP(\d+)/g,'$1 pula').trim()}
