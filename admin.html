@@ -163,6 +163,33 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(18
 @media (min-width:721px){.actions{display:flex;flex-wrap:wrap}.actions .btn{width:auto;min-width:130px}}
 @media (max-width:720px){.brand small{display:none}.top .btn.apbtn{display:none}.top .btn.apbtn.show{display:inline-flex}}
 @media (min-width:721px){.tabs{flex-wrap:wrap;overflow:visible}}
+
+/* assistant */
+.asopen{position:fixed;right:16px;bottom:20px;z-index:45;min-height:52px;padding:0 22px;border-radius:26px;background:var(--accent);color:#fff;font:600 16px/1 var(--sans);box-shadow:0 10px 28px rgba(74,46,38,.3)}
+.asopen[hidden],.aspan[hidden]{display:none!important}
+.aspan{position:fixed;right:16px;bottom:16px;z-index:60;width:min(420px,calc(100vw - 32px));height:min(620px,calc(100vh - 32px));display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px rgba(74,46,38,.3);overflow:hidden}
+.aspan__h{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--fg);color:#fff;font-size:16px}
+.aspan__h button{color:#fff;font-weight:600;min-height:40px;padding:0 10px}
+.aspan__log{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--night)}
+.as__m{max-width:92%;padding:10px 14px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:15px;line-height:1.45;align-self:flex-start}
+.as__m.me{align-self:flex-end;background:var(--fg);color:#fff;border-color:var(--fg)}
+.as__m ul{padding-left:18px}.as__m li{margin:3px 0}
+.as__m small{color:var(--mut)}
+.as__d{font-size:13px;font-weight:600;color:var(--mut);margin:8px 0 2px}
+.as__b{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.as__b em{font-style:normal;font-size:12px;white-space:nowrap}
+.as__a{flex:none;font-weight:600;color:var(--ok);padding:6px 0;text-decoration:underline}
+.as__y{display:flex;gap:8px;margin-top:10px}
+.as__y button,.aspan__q button{min-height:44px;padding:0 14px;border:1.5px solid #cdbfb4;border-radius:10px;font-weight:600;background:#fff;font-size:14px}
+.as__y button:first-child{background:var(--fg);color:#fff;border-color:var(--fg)}
+.aspan__q{display:flex;gap:8px;overflow-x:auto;padding:10px 12px;border-top:1px solid var(--line);scrollbar-width:none}
+.aspan__q button{flex:none}
+.aspan__f{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.aspan__f input{flex:1;min-width:0}
+@media (max-width:720px){
+  .asopen{bottom:calc(84px + env(safe-area-inset-bottom))}
+  .aspan{inset:0;width:100%;height:100%;border-radius:0;border:0}
+}
 </style>
 </head>
 <body>
@@ -208,6 +235,13 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(18
     <div id="view"></div>
   </main>
 </div>
+<button class="asopen" id="asOpen" type="button" aria-label="Open assistant" hidden>Assistant</button>
+<section class="aspan" id="asPanel" hidden aria-label="Assistant">
+  <div class="aspan__h"><b>Assistant</b><button type="button" id="asClose" aria-label="Close assistant">Close</button></div>
+  <div class="aspan__log" id="asLog" aria-live="polite"></div>
+  <div class="aspan__q"><button data-q="today">Today</button><button data-q="tomorrow">Tomorrow</button><button data-q="needs action">Needs action</button><button data-q="who needs a reminder">Reminders due</button><button data-q="earnings this week">Earnings</button><button data-q="help">Help</button></div>
+  <form class="aspan__f" id="asForm"><input id="asIn" type="text" placeholder="Type a command, e.g. remind me at 5pm to call Neo" autocomplete="off" enterkeyhint="send" /><button class="btn btn--solid" type="submit">Send</button></form>
+</section>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -271,7 +305,7 @@ function api(path,opt,retry){
     return r.status===204||opt.prefer==='return=minimal'?null:r.json();
   });
 }
-function signOut(){session=null;try{localStorage.removeItem('wh_admin')}catch(_){}clearTimeout(pollT);$('#appView').hidden=true;$('#loginView').hidden=false;document.title='Wealthy Health Bookings'}
+function signOut(){$('#asOpen').hidden=true;$('#asPanel').hidden=true;session=null;try{localStorage.removeItem('wh_admin')}catch(_){}clearTimeout(pollT);$('#appView').hidden=true;$('#loginView').hidden=false;document.title='Wealthy Health Bookings'}
 
 /* ---------- data ---------- */
 function load(first){
@@ -327,8 +361,16 @@ function card(b){
     (b.address?'<div><span>Address / notes</span>'+esc(b.address)+'</div>':'')+(b.health_notes?'<div style="grid-column:1/-1"><span style="color:var(--gold)">Health notes</span>'+esc(b.health_notes)+'</div>':'')+'<div><span>Estimate · Ref</span>P'+esc(b.total)+' · '+esc(b.ref)+'</div></div>'+
     '<div class="actions">'+acts+'</div></article>';
 }
+function sortList(l){
+  if(sortMode==='newest')return l.slice().sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at)});
+  if(sortMode==='oldest')return l.slice().sort(function(a,b){return new Date(a.created_at)-new Date(b.created_at)});
+  if(sortMode==='name')return l.slice().sort(function(a,b){return String(a.customer_name).localeCompare(String(b.customer_name))});
+  if(sortMode==='price')return l.slice().sort(function(a,b){return (+b.total||0)-(+a.total||0)});
+  return l;
+}
 function grouped(list){
   var out='',last='';
+  if(sortMode!=='time'){return sortList(list).map(card).join('')}
   list.forEach(function(b){var k=dayKey(b.starts_at);if(k!==last){out+='<p class="day">'+dayLabel(k)+'</p>';last=k}out+=card(b)});
   return out||'';
 }
@@ -455,11 +497,161 @@ $('#alertsBtn').addEventListener('click',function(){
 });
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){})}
 
+/* ---------- assistant: type a command, it answers or acts. Runs on this device only, no AI service, no cost ---------- */
+var sortMode='time',pendingAct=null,remList=[];
+try{remList=JSON.parse(localStorage.getItem('wh_rem')||'[]')}catch(_){remList=[]}
+function saveRem(){try{localStorage.setItem('wh_rem',JSON.stringify(remList))}catch(_){}}
+function dayStart(key){return new Date(key+'T00:00:00+02:00').getTime()}
+function keyPlus(n){return dayKey(new Date(Date.now()+n*864e5).toISOString())}
+function asSay(h,me){var l=$('#asLog'),d=document.createElement('div');d.className='as__m'+(me?' me':'');d.innerHTML=h;l.appendChild(d);l.scrollTop=l.scrollHeight;return d}
+function bkLine(b){return '<div class="as__b"><span><b>'+fmtTime(b.starts_at)+'</b> '+esc(b.customer_name)+', '+esc(b.service)+'</span><em class="pill '+b.status+'">'+b.status+'</em></div>'}
+function bkList(arr,title){
+  if(!arr.length)return title+': nothing.';
+  var out='<p><b>'+title+' ('+arr.length+')</b></p>',last='';
+  arr.forEach(function(b){var k=dayKey(b.starts_at);if(k!==last){out+='<p class="as__d">'+dayLabel(k)+'</p>';last=k}out+=bkLine(b)});
+  return out;
+}
+function live(){return bookings.filter(function(b){return b.status==='new'||b.status==='confirmed'})}
+function byDay(key){return live().filter(function(b){return dayKey(b.starts_at)===key})}
+/* parse "5pm", "17:00", "5:30 pm", "in 30 minutes", with optional today/tomorrow. returns Date or null */
+function parseWhen(t){
+  var m,now=new Date();
+  if((m=t.match(/\bin (\d+)\s*(min|mins|minutes?|hours?|hrs?|h)\b/))){var n=+m[1];return new Date(now.getTime()+n*(/^h/.test(m[2])?36e5:6e4))}
+  var dayOff=/\btomorrow\b/.test(t)?1:0;
+  if((m=t.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/))||(m=t.match(/\b(\d{1,2}):(\d{2})()\b/))){
+    var h=+m[1],mi=+(m[2]||0);
+    if(m[3]==='pm'&&h<12)h+=12;if(m[3]==='am'&&h===12)h=0;
+    if(h>23||mi>59)return null;
+    var key=keyPlus(dayOff),d=new Date(key+'T'+('0'+h).slice(-2)+':'+('0'+mi).slice(-2)+':00+02:00');
+    if(!dayOff&&d<=now)d=new Date(d.getTime()+864e5);
+    return d;
+  }
+  return null;
+}
+function whenText(d){return d.toLocaleString('en-GB',{timeZone:TZ,weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+function periodOf(t){
+  if(/\btoday\b/.test(t))return {a:dayStart(keyPlus(0)),b:dayStart(keyPlus(1)),n:'today'};
+  if(/\btomorrow\b/.test(t))return {a:dayStart(keyPlus(1)),b:dayStart(keyPlus(2)),n:'tomorrow'};
+  if(/\bmonth\b/.test(t)){var k=keyPlus(0).slice(0,7),y=+k.slice(0,4),mo=+k.slice(5);var nx=mo===12?(y+1)+'-01':y+'-'+('0'+(mo+1)).slice(-2);return {a:dayStart(k+'-01'),b:dayStart(nx+'-01'),n:'this month'}}
+  return {a:dayStart(keyPlus(0)),b:dayStart(keyPlus(7)),n:'the next 7 days'};
+}
+function pickByName(t,list){
+  var q=t.replace(/\b(confirm|decline|cancel|booking|bookings|for|the|please|reject|accept)\b/g,'').trim();
+  if(!q)return [];
+  return list.filter(function(b){return (b.customer_name||'').toLowerCase().indexOf(q)>-1});
+}
+function checkRem(){
+  var now=Date.now(),fired=false;
+  remList.forEach(function(r){if(!r.done&&r.at<=now){r.done=true;fired=true;notify('Reminder',r.text);try{beep()}catch(_){}toast('Reminder: '+r.text);asSay('<b>Reminder:</b> '+esc(r.text))}});
+  if(fired)saveRem();
+}
+setInterval(checkRem,15000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)checkRem()});
+function goTab(name){var b=document.querySelector('.tab[data-t="'+name+'"]');if(b)b.click()}
+var HELP='<p><b>Things you can ask</b></p><ul><li>today, tomorrow, this week, needs action, next</li><li>find Neo</li><li>who needs a reminder</li><li>earnings this week, earnings this month</li><li>confirm all, confirm Neo, decline Neo</li><li>remind me at 5pm to call Neo</li><li>remind me in 30 minutes to check payments</li><li>my reminders, clear reminders</li><li>block tomorrow 14:00 to 16:00 lunch</li><li>sort by newest, sort by name, sort by time</li><li>open reviews, open vouchers, open settings</li></ul>';
+function handle(raw){
+  var t=raw.toLowerCase().replace(/[?!.]+$/,'').replace(/\s+/g,' ').trim(),m;
+  if(pendingAct){
+    var p=pendingAct;
+    if(/^(yes|y|ok|okay|confirm|do it|sure)$/.test(t)){pendingAct=null;return p()}
+    if(/^(no|n|cancel|stop)$/.test(t)){pendingAct=null;return 'Okay, nothing changed.'}
+    pendingAct=null;
+  }
+  if(!t)return '';
+  if(/^(help|what can you do|commands)$/.test(t)||t==='?')return HELP;
+  if(/^(hi|hello|hey)\b/.test(t))return 'Hello. Ask for today, tomorrow, needs action, or type help.';
+  /* reminders */
+  if(/^remind/.test(t)){
+    var when=parseWhen(t);
+    var txt=raw.replace(/^\s*remind me\s*/i,'').replace(/\bin \d+\s*(min|mins|minutes?|hours?|hrs?|h)\b/i,'').replace(/\b(at|on)?\s*\d{1,2}(:\d{2})?\s*(am|pm)?\b/i,'').replace(/\b(tomorrow|today|at)\b/gi,'').replace(/^\s*(to|about)\s+/i,'').replace(/\s+(to|about)\s+/i,' ').replace(/\s+/g,' ').trim();
+    if(!when)return 'When should I remind you? Try: remind me at 5pm to call Neo, or remind me in 30 minutes to check payments.';
+    if(!txt)txt='Check bookings';
+    remList.push({id:Date.now(),at:when.getTime(),text:txt.charAt(0).toUpperCase()+txt.slice(1),done:false});saveRem();
+    return 'Done. I will remind you on '+whenText(when)+': <b>'+esc(txt)+'</b>.<br><small>Reminders ring while the app is open or running in the background on this device.</small>';
+  }
+  if(/^(my )?reminders$/.test(t)||/^(show|list) (my )?reminders$/.test(t)){
+    var act=remList.filter(function(r){return !r.done}).sort(function(a,b){return a.at-b.at});
+    return act.length?'<p><b>Reminders ('+act.length+')</b></p>'+act.map(function(r){return '<div class="as__b"><span>'+esc(r.text)+'</span><em>'+whenText(new Date(r.at))+'</em></div>'}).join(''):'You have no reminders set.';
+  }
+  if(/^clear (my )?reminders$/.test(t)){remList=[];saveRem();return 'All reminders cleared.'}
+  /* navigation */
+  if((m=t.match(/^(open|go to|show) (reviews?|vouchers?|questions|time off|settings|upcoming|history|needs action)$/))){
+    var map={review:'rev',reviews:'rev',voucher:'gv',vouchers:'gv',questions:'qs','time off':'off',settings:'set',upcoming:'up',history:'hist','needs action':'new'};
+    goTab(map[m[2]]);return 'Opened '+m[2]+'.';
+  }
+  /* sorting */
+  if((m=t.match(/^sort(?: bookings)?(?: by)? (time|date|newest|latest|recent|name|price|oldest)$/))){
+    var k=m[1];sortMode=(k==='time'||k==='date')?'time':(k==='newest'||k==='latest'||k==='recent')?'newest':k==='oldest'?'oldest':k==='name'?'name':'price';
+    render();return 'Bookings are now sorted by '+({time:'date and time',newest:'newest requests first',oldest:'oldest requests first',name:'customer name',price:'price, highest first'})[sortMode]+'.';
+  }
+  /* blocks */
+  if(/^block\b/.test(t)){
+    var dkey=/\btomorrow\b/.test(t)?keyPlus(1):/\btoday\b/.test(t)?keyPlus(0):(t.match(/\b(\d{4}-\d{2}-\d{2})\b/)||[])[1];
+    var tm=[],re=/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/g,mm,body=t.replace(/\b\d{4}-\d{2}-\d{2}\b/,'');
+    while((mm=re.exec(body))){var h=+mm[1],mi=+(mm[2]||0);if(mm[3]==='pm'&&h<12)h+=12;if(mm[3]==='am'&&h===12)h=0;if(h<24&&mi<60&&(mm[2]||mm[3]||h>=8))tm.push(('0'+h).slice(-2)+':'+('0'+mi).slice(-2))}
+    if(!dkey||tm.length<2)return 'Tell me the day and the times. Example: block tomorrow 14:00 to 16:00 lunch.';
+    var reason=t.replace(/^block\s*/,'').replace(/\b(today|tomorrow|\d{4}-\d{2}-\d{2})\b/g,'').replace(/\d{1,2}(:\d{2})?\s*(am|pm)?/g,'').replace(/\b(to|until|from|till|-)\b/g,'').replace(/\s+/g,' ').trim();
+    if(tm[1]<=tm[0])return 'The end time must be after the start time.';
+    pendingAct=function(){
+      api('blocks',{method:'POST',body:{starts_at:dkey+'T'+tm[0]+':00+02:00',ends_at:dkey+'T'+tm[1]+':00+02:00',reason:reason||null}})
+        .then(function(){load(false);asSay('Blocked '+dkey+' from '+tm[0]+' to '+tm[1]+'. Customers cannot book that time.')}).catch(function(){asSay('Could not save the block. Try again.')});
+      return 'Saving...';
+    };
+    return 'Block <b>'+dkey+'</b> from <b>'+tm[0]+'</b> to <b>'+tm[1]+'</b>'+(reason?' ('+esc(reason)+')':'')+'? Customers will not be able to book it.<div class="as__y"><button data-q="yes">Yes, block it</button><button data-q="no">No</button></div>';
+  }
+  /* confirm / decline */
+  if((m=t.match(/^(confirm|accept|decline|reject)\b(.*)$/))){
+    var ok=/^(confirm|accept)/.test(m[1]),st=ok?'confirmed':'declined',pool=bookings.filter(function(b){return b.status==='new'}),rest=m[2].trim();
+    var sel=/^(all|everything|all bookings|all requests)?$/.test(rest)?pool:pickByName(rest,pool);
+    if(!sel.length)return pool.length?'I could not find a waiting request for that name. Waiting: '+pool.map(function(b){return esc(b.customer_name)}).join(', ')+'.':'There is nothing waiting for action.';
+    pendingAct=function(){
+      Promise.all(sel.map(function(b){return api('bookings?id=eq.'+b.id,{method:'PATCH',body:{status:st}}).then(function(){b.status=st;delete fresh[b.id]})}))
+        .then(function(){render();asSay((ok?'Confirmed ':'Declined ')+sel.length+' booking'+(sel.length>1?'s':'')+'.'+(ok?' Open Upcoming and tap Tell customer to message each person.':''))}).catch(function(){asSay('Some updates failed. Check Needs action.')});
+      return 'Working on it...';
+    };
+    return (ok?'Confirm ':'Decline ')+sel.length+' booking'+(sel.length>1?'s':'')+'?'+sel.map(bkLine).join('')+'<div class="as__y"><button data-q="yes">Yes</button><button data-q="no">No</button></div>';
+  }
+  /* who needs a reminder */
+  if(/(need|needs|send|owe).*(reminder)|reminders? (to|due)/.test(t)){
+    var due=bookings.filter(function(b){var s=new Date(b.starts_at).getTime();return b.status==='confirmed'&&!b.reminded_at&&s>Date.now()&&s<Date.now()+36*36e5});
+    return due.length?'<p><b>Send a reminder to ('+due.length+')</b></p>'+due.map(function(b){return '<div class="as__b"><span><b>'+fmtTime(b.starts_at)+'</b> '+esc(b.customer_name)+'</span><a class="as__a" target="_blank" rel="noopener" data-remind="'+b.id+'" href="'+waRemind(b)+'">Send on WhatsApp</a></div>'}).join(''):'No reminders are due. Everyone in the next 36 hours has been reminded.';
+  }
+  /* money */
+  if(/\b(earn|earnings|revenue|income|money|sales|takings|how much)\b/.test(t)){
+    var per=periodOf(t),set=bookings.filter(function(b){var s=new Date(b.starts_at).getTime();return (b.status==='confirmed'||b.status==='done')&&s>=per.a&&s<per.b});
+    var sum=set.reduce(function(a,b){return a+(+b.total||0)},0);
+    return '<b>P'+sum+'</b> from '+set.length+' confirmed booking'+(set.length===1?'':'s')+' for '+per.n+'.<br><small>These are the estimates from the website. Final prices may differ.</small>';
+  }
+  /* lists */
+  if(/^(needs action|pending|new|waiting|requests)$/.test(t)||/needs? (my )?action/.test(t))return bkList(bookings.filter(function(b){return b.status==='new'}),'Waiting for you');
+  if(/\btoday\b/.test(t))return bkList(byDay(keyPlus(0)),'Today');
+  if(/\btomorrow\b/.test(t))return bkList(byDay(keyPlus(1)),'Tomorrow');
+  if(/\b(week|7 days|upcoming)\b/.test(t)){var e=Date.now()+7*864e5;return bkList(live().filter(function(b){var s=new Date(b.starts_at).getTime();return s>=Date.now()-36e5&&s<=e}),'Next 7 days')}
+  if(/\b(next|who is next|whos next)\b/.test(t)){var nx=live().filter(function(b){return new Date(b.ends_at)>new Date()})[0];return nx?'<p><b>Next booking</b></p>'+bkLine(nx)+'<p class="as__d">'+dayLabel(dayKey(nx.starts_at))+'. '+esc(nx.customer_phone)+(nx.address?'. '+esc(nx.address):'')+'</p>':'No upcoming bookings.'}
+  if((m=t.match(/^(find|search|show|look up|who is)\s+(.+)$/))){
+    var q=m[2],r=bookings.filter(function(b){return [b.customer_name,b.customer_phone,b.service,b.ref].join(' ').toLowerCase().indexOf(q)>-1});
+    return r.length?bkList(r.slice(0,12),'Matches for '+esc(q)):'No bookings found for "'+esc(q)+'".';
+  }
+  return 'I did not understand that. Type <b>help</b> to see what I can do.';
+}
+function runAs(q){
+  asSay(esc(q),true);
+  var r;try{r=handle(q)}catch(e){r='Something went wrong. Try again.'}
+  if(r)asSay(r);
+}
+(function(){
+  var open=$('#asOpen'),pan=$('#asPanel'),form=$('#asForm'),inp=$('#asIn');
+  function set(o){pan.hidden=!o;open.hidden=o;if(o){if(!$('#asLog').children.length)asSay('Hi. Ask for <b>today</b>, <b>needs action</b>, set a reminder, or type <b>help</b>.');setTimeout(function(){inp.focus()},50)}}
+  open.addEventListener('click',function(){set(true)});$('#asClose').addEventListener('click',function(){set(false)});
+  form.addEventListener('submit',function(e){e.preventDefault();var v=inp.value.trim();if(!v)return;inp.value='';runAs(v)});
+  pan.addEventListener('click',function(e){var c=e.target.closest('[data-q]');if(c){runAs(c.dataset.q);return}var r=e.target.closest('[data-remind]');if(r){api('bookings?id=eq.'+r.dataset.remind,{method:'PATCH',body:{reminded_at:new Date().toISOString()}}).then(function(){bookings.forEach(function(b){if(String(b.id)===r.dataset.remind)b.reminded_at=new Date().toISOString()});render()}).catch(function(){})}});
+})();
+
 function enter(){
   api('admins?select=user_id',{prefer:'return=representation'}).then(function(r){
     if(!r||!r.length){$('#loginErr').textContent='This account is not set up as an owner.';signOut();$('#loginErr').textContent='This account is not set up as an owner.';return}
     $('#loginView').hidden=true;$('#appView').hidden=false;
-    initApp();
+    initApp();$('#asOpen').hidden=false;
     load(true).then(poll);
   }).catch(function(){$('#loginErr').textContent='Could not sign in. Check the address and try again.';signOut()});
 }
