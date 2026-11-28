@@ -265,6 +265,39 @@ main{padding-bottom:96px}
 .hrow__t{font-weight:800;font-size:17px;line-height:1.1}.hrow__t small{display:block;font-weight:500;color:var(--mut);font-size:12px}
 .hrow__m{min-width:0}.hrow__m b{display:block}.hrow__m p{font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .asopen{display:flex;align-items:center;gap:8px}.asopen::before{content:'✦'}
+
+/* ---- polish ---- */
+.greet{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:18px;margin-bottom:16px;border-radius:20px;background:linear-gradient(135deg,#4a2e26,#6b4034);color:#f7ece0}
+.greet__lo{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.12);color:#f2b27a}
+.greet h2{font:700 19px/1.2 var(--sans)}.greet p{font-size:14px;margin-top:3px;color:#ecd9c8}.greet p b{color:#fff}.greet small{display:block;font-size:12px;margin-top:6px;color:#d3b9a4}
+.ring{position:relative;width:64px;height:64px;display:grid;place-items:center;border-radius:50%}.ring svg{position:absolute;inset:0}.ring span{font-weight:800;font-size:13px;color:#fff;position:relative}
+.av{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;color:#fff;font-size:11px;font-weight:800;margin-right:8px;vertical-align:middle}
+.bdg{font-style:normal;font-size:11px;font-weight:700;margin-left:8px;padding:2px 8px;border-radius:99px;background:var(--card2);color:var(--gold);vertical-align:middle}.bdg.star{background:none;color:#c58a1d;font-size:15px;padding:0}
+.hq{display:flex;gap:8px;padding:8px 2px 0}.hq a{flex:1;min-height:44px;display:grid;place-items:center;border-radius:12px;border:1.5px solid #cdbfb4;background:var(--card);font-size:13px;font-weight:700;text-decoration:none}
+.sw--n{overflow:visible}
+.hl.rail{border-left:2px solid var(--line);padding-left:12px;margin-left:6px}
+.gap{margin:0 0 10px;padding:10px 14px;border:1.5px dashed var(--line);border-radius:14px;color:var(--mut);font-size:13px;font-weight:600;background:transparent}
+.emp{text-align:center;padding:28px 12px;color:var(--mut)}.emp__l{display:block;color:var(--accent);opacity:.8;margin-bottom:8px}.emp b{color:var(--fg);font-size:17px}.emp p{margin-bottom:12px}.emp .btn{display:inline-grid;place-items:center;text-decoration:none}
+.skel{height:76px;border-radius:16px;margin-bottom:10px;background:linear-gradient(90deg,var(--card2) 25%,var(--card) 50%,var(--card2) 75%);background-size:200% 100%;animation:sk 1.3s infinite linear}
+@keyframes sk{to{background-position:-200% 0}}
+.hl.fx .sw,.hl.fx .gap,.hl.fx .emp{animation:in .4s cubic-bezier(.22,1,.36,1) both}
+.hl.fx>*:nth-child(2){animation-delay:.05s}.hl.fx>*:nth-child(3){animation-delay:.1s}.hl.fx>*:nth-child(4){animation-delay:.15s}
+.okpop{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;z-index:120}.okpop svg{animation:pop .9s ease both}
+@keyframes pop{0%{transform:scale(.3);opacity:0}25%{transform:scale(1.1);opacity:1}70%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:0}}
+#toast a{pointer-events:auto;color:#ffd9b8;font-weight:700;margin-left:6px}
+.toast.on{pointer-events:auto}
+@media (prefers-reduced-motion:reduce){.skel,.hl.fx .sw,.okpop svg{animation:none!important}}
+/* ---- dark theme (auto after 18:00) ---- */
+html.dark{--night:#231813;--card:#33231c;--card2:#2c1d17;--line:rgba(243,230,216,.16);--fg:#f3e6d8;--mut:rgba(243,230,216,.68);--accent:#e0a15f;--gold:#d9b27a;--ok:#7fb08e;--bad:#e07a62;color-scheme:dark}
+html.dark .top{background:rgba(35,24,19,.94)}
+html.dark .card,html.dark .hrow,html.dark .wk__d,html.dark .wk__n,html.dark .burger,html.dark .drawer,html.dark .tab,html.dark .btn,html.dark input,html.dark select,html.dark .as__m,html.dark .aspan,html.dark .seg button.on,html.dark .aspan__v,html.dark .hq a,html.dark .btn--bad{background:var(--card)}
+html.dark .wk__d.on{background:#f3e6d8;border-color:#f3e6d8;color:#5a463c}html.dark .wk__d.on b{color:#231813}
+html.dark .btn,html.dark .burger,html.dark .wk__n,html.dark .hq a,html.dark input,html.dark select{border-color:rgba(243,230,216,.28)}
+html.dark .btn--solid,html.dark .asopen{background:var(--accent);border-color:var(--accent);color:#2a1a15}
+html.dark .toast{background:#f3e6d8;color:#231813}html.dark #toast a{color:#8c4a24}
+html.dark select option{background:#33231c;color:#f3e6d8}
+html.dark .greet{background:linear-gradient(135deg,#3a251d,#4b3228)}
+html.dark .seg button.on{color:var(--fg)}
 </style>
 </head>
 <body>
@@ -303,6 +336,7 @@ main{padding-bottom:96px}
     <div class="drawer__f">
       <button class="btn btn--solid apbtn" id="alertsBtn" type="button">Turn on alerts</button>
       <button class="btn apbtn" id="installBtn" type="button">Install app</button>
+      <button class="btn" id="themeBtn" type="button">Theme: Auto</button>
       <button class="btn" id="signout" type="button">Sign out</button>
     </div>
   </aside>
@@ -324,7 +358,7 @@ main{padding-bottom:96px}
       <button class="tab" role="tab" data-t="off" aria-selected="false">Time off</button>
       <button class="tab" role="tab" data-t="set" aria-selected="false">Settings</button>
     </div>
-    <div id="view"></div>
+    <div id="view"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
   </main>
 </div>
 <button class="asopen" id="asOpen" type="button" aria-label="Open assistant" hidden>Assistant</button>
@@ -371,6 +405,27 @@ function waRemind(b){
   var txt='Hi '+b.customer_name.split(' ')[0]+', a friendly reminder of your '+b.service+' with Wealthy Health on '+when+'. Please reply YES to confirm. You can change or cancel free up to 4 hours before; later cancellations or no-shows may be charged. Ref '+b.ref+'.';
   return 'https://wa.me/'+waNumber(b.customer_phone)+'?text='+encodeURIComponent(txt);
 }
+
+/* ---------- polish: theme, sounds, lotus ---------- */
+var LOTUS='<svg viewBox="0 0 64 64" width="44" height="44" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M32 12c7 7 7 22 0 32-7-10-7-25 0-32z"/><path d="M32 44c-3-12-14-18-24-16 2 12 12 20 24 16z"/><path d="M32 44c3-12 14-18 24-16-2 12-12 20-24 16z"/><path d="M10 50c8 5 36 5 44 0"/></svg>';
+function themeMode(){try{return localStorage.getItem('wh_theme')||'auto'}catch(_){return 'auto'}}
+function applyTheme(){
+  var m=themeMode(),h=+new Date().toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',hour12:false}).slice(0,2),dark=m==='dark'||(m==='auto'&&(h>=18||h<6));
+  document.documentElement.classList.toggle('dark',dark);
+  var mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=dark?'#231813':'#4a2e26';
+  var b=document.getElementById('themeBtn');if(b)b.textContent='Theme: '+({auto:'Auto',light:'Light',dark:'Dark'})[m];
+}
+setInterval(applyTheme,6e5);
+var _ac=null;
+function chime(kind){
+  try{
+    var A=window.AudioContext||window.webkitAudioContext;if(!A)return;_ac=_ac||new A();if(_ac.state==='suspended')_ac.resume();
+    var f=kind==='new'?[784,988]:[659,880],t=_ac.currentTime;
+    f.forEach(function(hz,i){var o=_ac.createOscillator(),g=_ac.createGain();o.type='sine';o.frequency.value=hz;o.connect(g);g.connect(_ac.destination);
+      g.gain.setValueAtTime(0,t+i*.14);g.gain.linearRampToValueAtTime(.12,t+i*.14+.02);g.gain.exponentialRampToValueAtTime(.001,t+i*.14+.5);o.start(t+i*.14);o.stop(t+i*.14+.55)});
+  }catch(_){}
+}
+function toastHTML(h,ms){var t=$('#toast');t.innerHTML=h;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},ms||7000)}
 function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},4000)}
 function beep(){
   try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=880;
@@ -446,10 +501,13 @@ function poll(){clearTimeout(pollT);pollT=setTimeout(function(){tick().then(poll
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&session){tick();poll()}});
 
 /* ---------- render ---------- */
+function popOk(){var d=document.createElement('div');d.className='okpop';d.innerHTML='<svg viewBox="0 0 52 52" width="96" height="96"><circle cx="26" cy="26" r="24" fill="#3f7d5a"/><path d="M15 27l8 8 15-17" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';document.body.appendChild(d);setTimeout(function(){d.remove()},1000)}
 function setStatus(id,status){
   api('bookings?id=eq.'+id,{method:'PATCH',body:{status:status}}).then(function(){
-    bookings.forEach(function(b){if(String(b.id)===String(id))b.status=status});delete fresh[id];render();
-    toast(status==='confirmed'?'Confirmed. Tap "Tell customer" to message them.':'Updated');
+    var bb=null;bookings.forEach(function(b){if(String(b.id)===String(id)){b.status=status;bb=b}});delete fresh[id];render();
+    if(status==='confirmed'&&bb){chime('ok');try{navigator.vibrate&&navigator.vibrate(30)}catch(_){}popOk();
+      toastHTML('Confirmed ✓ <a target="_blank" rel="noopener" href="'+waLink(bb)+'">Message '+esc(bb.customer_name.split(' ')[0])+'</a>')}
+    else toast('Updated');
   }).catch(function(){toast('Could not update. Try again.')});
 }
 function card(b){
@@ -480,22 +538,60 @@ function grouped(list){
   return out||'';
 }
 
-/* ---------- home: week strip + inbox ---------- */
-function weekDays(){
+/* ---------- home: greeting, week strip + inbox ---------- */
+function weekKeys(o){
   var t=dayKey(new Date().toISOString()),dow=new Date(t+'T12:00:00Z').getUTCDay(),mon=(dow+6)%7,out=[];
-  for(var i=0;i<7;i++){var d=new Date(new Date(t+'T12:00:00Z').getTime()+(i-mon+wkOff*7)*864e5);out.push(d.toISOString().slice(0,10))}
+  for(var i=0;i<7;i++){var d=new Date(new Date(t+'T12:00:00Z').getTime()+(i-mon+o*7)*864e5);out.push(d.toISOString().slice(0,10))}
   return out;
 }
-function rowOf(b){
+function weekDays(){return weekKeys(wkOff)}
+var homeFx=false,PAL=['#b4480f','#8c4a24','#3f7d5a','#6b5a8c','#a8793f','#4f7a8c'];
+function initials(n){var p=String(n||'?').trim().split(/\s+/);return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase()}
+function colorOf(n){var h=0;String(n).split('').forEach(function(c){h+=c.charCodeAt(0)});return PAL[h%PAL.length]}
+function clientStats(){
+  var m={};bookings.forEach(function(b){if(b.status==='declined'||b.status==='cancelled')return;var k=waNumber(b.customer_phone);m[k]=m[k]||{n:0,t:0};m[k].n++;m[k].t+=(+b.total||0)});
+  var top=0,topK='';Object.keys(m).forEach(function(k){if(m[k].n>=2&&m[k].t>top){top=m[k].t;topK=k}});m.__top=topK;return m;
+}
+function mapLink(b){var q=[b.address,b.area,'Gaborone'].filter(Boolean).join(', ');return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)}
+function rowOf(b,cs){
   if(String(openId)===String(b.id))return card(b).replace('<article class="card','<article data-open="'+b.id+'" class="card');
-  var where=[b.setting,b.area].filter(Boolean).join(', ');
-  var r='<div class="hrow" data-open="'+b.id+'"><div class="hrow__t">'+fmtTime(b.starts_at)+'<small>'+b.duration_min+' min</small></div><div class="hrow__m"><b>'+esc(b.customer_name)+'</b><p>'+esc(b.service)+(where?' · '+esc(where):'')+'</p></div><span class="pill '+b.status+'">'+b.status+'</span></div>';
+  var where=[b.setting,b.area].filter(Boolean).join(', '),k=waNumber(b.customer_phone),st=cs&&cs[k],badge='';
+  if(cs&&cs.__top===k)badge='<i class="bdg star" title="Top client">★</i>';else if(st&&st.n>=3)badge='<i class="bdg">Regular</i>';
+  var r='<div class="hrow" data-open="'+b.id+'"><div class="hrow__t">'+fmtTime(b.starts_at)+'<small>'+b.duration_min+' min</small></div><div class="hrow__m"><b><span class="av" style="background:'+colorOf(b.customer_name)+'">'+esc(initials(b.customer_name))+'</span>'+esc(b.customer_name)+badge+'</b><p>'+esc(b.service)+(where?' · '+esc(where):'')+'</p></div><span class="pill '+b.status+'">'+b.status+'</span></div>';
   if(b.status==='new')return '<div class="sw" data-id="'+b.id+'"><div class="sw__act">✓ Confirm</div>'+r+'</div>';
-  return '<div class="sw sw--n">'+r+'</div>';
+  var q='<div class="hq"><a target="_blank" rel="noopener" href="'+waLink(b)+'">WhatsApp</a><a href="tel:'+esc(String(b.customer_phone).replace(/[^\d+]/g,''))+'">Call</a>'+((b.address||b.area)&&!/studio/i.test(b.setting||'')?'<a target="_blank" rel="noopener" href="'+mapLink(b)+'">Directions</a>':'')+'</div>';
+  return '<div class="sw sw--n">'+r+q+'</div>';
+}
+function hm(ms){var d=new Date(ms);return d.toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit'})}
+function gaps(sess,key){
+  var out=[],now=Date.now(),a=new Date(key+'T08:00:00+02:00').getTime(),end=new Date(key+'T22:00:00+02:00').getTime(),cur=Math.max(a,Math.ceil(now/9e5)*9e5);
+  sess.forEach(function(b){var s0=new Date(b.starts_at).getTime(),e0=new Date(b.ends_at).getTime();if(s0-cur>=36e5)out.push({at:s0,h:'<div class="gap">Free '+hm(cur)+' – '+hm(s0)+' · '+durTxt(s0-cur)+'</div>'});if(e0>cur)cur=e0});
+  if(end-cur>=36e5&&end>now)out.push({at:end,h:'<div class="gap">Free '+hm(cur)+' – '+hm(end)+' · '+durTxt(end-cur)+'</div>'});
+  return out;
+}
+function durTxt(ms){var m=Math.round(ms/6e4),h=Math.floor(m/60),r=m%60;return (h?h+' h':'')+(h&&r?' ':'')+(r?r+' min':'')}
+function greetCard(active,needs){
+  var today=dayKey(new Date().toISOString()),now=Date.now(),hr=+new Date().toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',hour12:false}).slice(0,2);
+  var g=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+  var td=active.filter(function(b){return dayKey(b.starts_at)===today}),doneT=bookings.filter(function(b){return b.status==='done'&&dayKey(b.starts_at)===today});
+  var all=td.concat(doneT),rem=td.filter(function(b){return new Date(b.ends_at)>now}),exp=all.reduce(function(a,b){return a+(+b.total||0)},0);
+  var line;
+  if(!all.length)line='Nothing booked today yet.'+(needs.length?' '+needs.length+' request'+(needs.length>1?'s':'')+' waiting.':'');
+  else if(!rem.length)line='<b>Day complete ✓</b> Well done. P'+exp+' earned today.';
+  else line='<b>'+rem.length+' session'+(rem.length>1?'s':'')+' to go</b>, next at '+fmtTime(rem[0].starts_at)+'. P'+exp+' expected.';
+  var wk=weekKeys(0),earn=bookings.filter(function(b){return wk.indexOf(dayKey(b.starts_at))>-1&&(b.status==='done'||(b.status==='confirmed'&&new Date(b.ends_at)<now))}).reduce(function(a,b){return a+(+b.total||0)},0);
+  var goal=0;try{goal=+localStorage.getItem('wh_goal')||0}catch(_){}
+  var pct=goal?Math.min(1,earn/goal):0,C=2*Math.PI*24;
+  var ring='<button type="button" class="ring" data-goal="1" aria-label="Weekly goal"><svg viewBox="0 0 60 60" width="64" height="64"><circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="6"/><circle cx="30" cy="30" r="24" fill="none" stroke="#f2b27a" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+(C*pct).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 30 30)"/></svg><span>'+(goal?Math.round(pct*100)+'%':'Goal')+'</span></button>';
+  return '<section class="greet"><div class="greet__l"><span class="greet__lo">'+LOTUS+'</span></div><div class="greet__m"><h2>'+g+', Wealthy</h2><p>'+line+'</p><small>This week P'+earn+(goal?' of P'+goal:' · tap the ring to set a goal')+'</small></div>'+ring+'</section>';
+}
+function emptySess(key){
+  var past=key<dayKey(new Date().toISOString());
+  return '<div class="emp"><span class="emp__l">'+LOTUS.replace('width="44" height="44"','width="72" height="72"')+'</span><p><b>'+(past?'Nothing on this day':'No sessions. Time to rest.')+'</b></p>'+(past?'':'<button type="button" class="btn" data-share="'+key+'">Share free hours</button>')+'</div>';
 }
 function homeView(needs,active,hist){
-  var today=dayKey(new Date().toISOString()),days=weekDays();
-  if(!selDay||(wkOff===0&&days.indexOf(selDay)<0&&false))selDay=today;
+  var today=dayKey(new Date().toISOString()),days=weekDays(),cs=clientStats();
+  if(!selDay)selDay=today;
   var dn=['M','T','W','T','F','S','S'],cnt={};
   active.forEach(function(b){var k=dayKey(b.starts_at);cnt[k]=(cnt[k]||0)+1});
   var mon=new Date(days[0]+'T12:00:00Z'),sun=new Date(days[6]+'T12:00:00Z'),M=function(d){return d.toLocaleDateString('en-GB',{timeZone:'UTC',day:'numeric',month:'short'})};
@@ -503,11 +599,15 @@ function homeView(needs,active,hist){
     days.map(function(k,i){return '<button type="button" class="wk__d'+(k===selDay?' on':'')+(k===today?' td':'')+'" data-day="'+k+'" aria-label="'+esc(dayLabel(k))+'">'+dn[i]+'<b>'+(+k.slice(8))+'</b>'+(cnt[k]?'<u></u>':'')+'</button>'}).join('')+'</div>';
   var sess=active.filter(function(b){return dayKey(b.starts_at)===selDay});
   var tabs='<div class="seg" role="tablist">'+[['sess','Sessions',sess.length],['req','Requests',needs.length],['done','Done','']].map(function(x){return '<button type="button" role="tab" data-seg="'+x[0]+'" aria-selected="'+(seg===x[0])+'" class="'+(seg===x[0]?'on':'')+(x[0]==='req'&&x[2]?' hot':'')+'">'+x[1]+(x[2]!==''?' <em>'+x[2]+'</em>':'')+'</button>'}).join('')+'</div>';
-  var body='';
-  if(seg==='sess')body=sess.map(rowOf).join('')||'<p class="empty">No sessions on '+esc(dayLabel(selDay))+'.'+(needs.length?' Check Requests.':'')+'</p>';
-  else if(seg==='req')body=(needs.length?'<p class="hint">Swipe a request right to confirm. Tap it for details and Decline.</p>':'')+(needs.map(function(b){var k=dayKey(b.starts_at);return rowOf(b)}).join('')||'<p class="empty">Nothing waiting. New requests appear here automatically.</p>');
-  else body=hist.slice(0,30).map(rowOf).join('')||'<p class="empty">Nothing finished yet.</p>';
-  return strip+tabs+'<div class="hl">'+body+'</div>';
+  var body='',rail='';
+  if(seg==='sess'){
+    if(!sess.length)body=emptySess(selDay);
+    else{rail=' rail';var g=gaps(sess,selDay),items=sess.map(function(b){return {at:new Date(b.starts_at).getTime(),h:rowOf(b,cs)}}).concat(g).sort(function(a,b){return a.at-b.at});body=items.map(function(x){return x.h}).join('')}
+  }
+  else if(seg==='req')body=(needs.length?'<p class="hint">Swipe a request right to confirm. Tap it for details and Decline.</p>':'')+(needs.map(function(b){return rowOf(b,cs)}).join('')||'<div class="emp"><span class="emp__l">'+LOTUS.replace('width="44" height="44"','width="72" height="72"')+'</span><p><b>All caught up.</b></p><p class="mut">New requests appear here automatically.</p></div>');
+  else body=hist.slice(0,30).map(function(b){return rowOf(b,cs)}).join('')||'<div class="emp"><p><b>Nothing finished yet.</b></p></div>';
+  var fx=homeFx?'':' fx';homeFx=true;
+  return greetCard(active,needs)+strip+tabs+'<div class="hl'+rail+fx+'">'+body+'</div>';
 }
 function render(){
   var now=Date.now(),today=dayKey(new Date().toISOString());
@@ -590,9 +690,23 @@ $('#view').addEventListener('click',function(e){
   var w=t.closest('[data-wk]');if(w){var v=+w.dataset.wk;wkOff=v===0?0:wkOff+v;if(v===0)selDay=dayKey(new Date().toISOString());else selDay=weekDays()[0];render();return}
   var d=t.closest('[data-day]');if(d){selDay=d.dataset.day;seg='sess';render();return}
   var g=t.closest('[data-seg]');if(g){seg=g.dataset.seg;openId='';render();return}
+  var gl=t.closest('[data-goal]');if(gl){var cur='';try{cur=localStorage.getItem('wh_goal')||''}catch(_){}var v2=prompt('Weekly earnings goal in Pula (0 to clear)',cur);if(v2!==null){try{localStorage.setItem('wh_goal',String(Math.max(0,parseInt(v2,10)||0)))}catch(_){}render()}return}
+  var sh=t.closest('[data-share]');if(sh){shareFree(sh);return}
   if(t.closest('a,button,input,select,textarea'))return;
   var o=t.closest('[data-open]');if(o&&tab==='home'){openId=String(openId)===o.dataset.open?'':o.dataset.open;render()}
 });
+function shareFree(btn){
+  var fk=btn.dataset.share,grid=[];for(var hh=8;hh<=21;hh++){grid.push(('0'+hh).slice(-2)+':00');if(hh<21)grid.push(('0'+hh).slice(-2)+':30')}
+  btn.disabled=true;btn.textContent='Checking...';
+  api('rpc/available_slots',{method:'POST',body:{p_date:fk,p_duration:60,p_times:grid},prefer:'return=representation'}).then(function(r){
+    r=(r||[]).filter(function(x){return grid.indexOf(x)>-1}).sort();
+    if(!r.length){btn.textContent='Fully blocked';return}
+    var ranges=[],a=r[0],p=r[0];function nx(x){var h=+x.slice(0,2),m=+x.slice(3)+30;if(m>=60){m-=60;h++}return ('0'+h).slice(-2)+':'+('0'+m).slice(-2)}
+    for(var i=1;i<=r.length;i++){if(r[i]!==nx(p)){ranges.push(a===p?a:a+' to '+p);a=r[i]}p=r[i]}
+    var txt='Wealthy Health has openings on '+dayLabel(fk)+': start times '+ranges.join(', ')+'. Book here: https://hammond212.github.io/Wealthy-health/';
+    var an=document.createElement('a');an.className='btn btn--solid';an.target='_blank';an.rel='noopener';an.href='https://wa.me/?text='+encodeURIComponent(txt);an.textContent='Send on WhatsApp';btn.replaceWith(an);
+  }).catch(function(){btn.disabled=false;btn.textContent='Share free hours';toast('Could not check. Try again.')});
+}
 (function(){
   var el=null,sx=0,sy=0,dx=0,dir=null,id=null;
   var v=$('#view');
@@ -607,11 +721,14 @@ $('#view').addEventListener('click',function(e){
     dx=Math.max(0,Math.min(x,140));var r=el.querySelector('.hrow');r.style.transition='none';r.style.transform='translateX('+dx+'px)';el.classList.toggle('go',dx>96);
   },{passive:true});
   function end(){
-    if(!el)return;var r=el.querySelector('.hrow'),ok=dx>96,i=id;r.style.transition='';r.style.transform='';el.classList.remove('go');el=null;
-    if(ok&&dir==='h')setStatus(i,'confirmed');
+    if(!el)return;var r=el.querySelector('.hrow'),ok=dx>96&&dir==='h',i=id,node=el;el=null;
+    if(ok){r.style.transition='transform .22s ease-in,opacity .22s';r.style.transform='translateX(110%)';r.style.opacity='0';setTimeout(function(){setStatus(i,'confirmed')},220);return}
+    r.style.transition='';r.style.transform='';node.classList.remove('go');
   }
   v.addEventListener('touchend',end);v.addEventListener('touchcancel',end);
 })();
+$('#themeBtn').addEventListener('click',function(){var m=themeMode(),n=m==='auto'?'dark':m==='dark'?'light':'auto';try{localStorage.setItem('wh_theme',n)}catch(_){}applyTheme()});
+applyTheme();
 $('#tabs').addEventListener('click',function(e){
   var b=e.target.closest('.tab');if(!b)return;tab=b.dataset.t;
   document.querySelectorAll('.tab').forEach(function(x){x.setAttribute('aria-selected',x===b)});render();if(/^(qs|rev|gv)$/.test(tab))load(false);
@@ -636,6 +753,7 @@ $('#signout').addEventListener('click',signOut);
 /* ---------- installable app: service worker, install, alerts ---------- */
 var swReg=null,installEv=null;
 function notify(title,body){
+  if(title==='New booking'&&!document.hidden){chime('new');try{navigator.vibrate&&navigator.vibrate(60)}catch(_){}}
   try{
     if(!('Notification' in window)||Notification.permission!=='granted')return;
     if(navigator.vibrate)navigator.vibrate([120,60,120]);
