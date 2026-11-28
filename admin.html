@@ -196,6 +196,12 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(18
 .asmic[hidden],#asVoice[hidden]{display:none}
 #asVoice{font-size:13px}
 .aspan__h span{display:flex;align-items:center;gap:6px}
+
+.aspan__v{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);background:#fff}
+.aspan__v label{margin:0;font-size:14px}
+.aspan__v select{min-height:44px;padding:.3em .6em;font-size:14px}
+.aspan__v #asVoiceSel{flex:1;min-width:0}
+.aspan__v[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -244,6 +250,7 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(18
 <button class="asopen" id="asOpen" type="button" aria-label="Open assistant" hidden>Assistant</button>
 <section class="aspan" id="asPanel" hidden aria-label="Assistant">
   <div class="aspan__h"><b>Assistant</b><span><button type="button" id="asVoice" aria-pressed="false" hidden>Voice replies: off</button><button type="button" id="asClose" aria-label="Close assistant">Close</button></span></div>
+  <div class="aspan__v" id="asVoiceRow" hidden><label for="asVoiceSel">Voice</label><select id="asVoiceSel"></select><select id="asRate" aria-label="Speaking speed"><option value="0.85">Slow</option><option value="1" selected>Normal</option><option value="1.2">Fast</option></select></div>
   <div class="aspan__log" id="asLog" aria-live="polite"></div>
   <div class="aspan__q"><button data-q="today">Today</button><button data-q="tomorrow">Tomorrow</button><button data-q="needs action">Needs action</button><button data-q="who needs a reminder">Reminders due</button><button data-q="earnings this week">Earnings</button><button data-q="help">Help</button></div>
   <form class="aspan__f" id="asForm"><button class="asmic" id="asMic" type="button" aria-label="Speak a command" hidden>Speak</button><input id="asIn" type="text" placeholder="Type a command, e.g. remind me at 5pm to call Neo" autocomplete="off" enterkeyhint="send" /><button class="btn btn--solid" type="submit">Send</button></form>
@@ -645,7 +652,7 @@ var voiceOn=false,SR=window.SpeechRecognition||window.webkitSpeechRecognition,re
 try{voiceOn=localStorage.getItem('wh_voice')==='1'}catch(_){}
 function speak(h){
   if(!voiceOn||!('speechSynthesis' in window))return;
-  try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(plain(h).slice(0,420));u.lang='en-GB';u.rate=1;speechSynthesis.speak(u)}catch(_){}
+  try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(plain(h).slice(0,420));u.lang='en-GB';u.rate=+($('#asRate').value||1);var vn=null;try{vn=localStorage.getItem('wh_vname')}catch(_){}var vs=speechSynthesis.getVoices();for(var i=0;i<vs.length;i++)if(vs[i].name===vn){u.voice=vs[i];u.lang=vs[i].lang}speechSynthesis.speak(u)}catch(_){}
 }
 function runAs(q){
   q=q.replace(/\b([ap])\.\s?m\.?/gi,'$1m').replace(/\bo'clock\b/gi,'').replace(/\b(\d{1,2}) (\d{2})\b(?=\s*(to|until|and|-|$))/g,'$1:$2');
@@ -662,6 +669,18 @@ function runAs(q){
   var mic=$('#asMic'),vb=$('#asVoice');
   function paintVoice(){vb.textContent='Voice replies: '+(voiceOn?'on':'off');vb.setAttribute('aria-pressed',voiceOn)}
   if('speechSynthesis' in window){vb.hidden=false;paintVoice();vb.addEventListener('click',function(){voiceOn=!voiceOn;try{localStorage.setItem('wh_voice',voiceOn?'1':'0')}catch(_){}if(!voiceOn)try{speechSynthesis.cancel()}catch(_){}paintVoice();if(voiceOn)speak('Voice replies are on.')})}
+
+  function fillVoices(){
+    if(!('speechSynthesis' in window))return;
+    var vs=speechSynthesis.getVoices().filter(function(v){return /^en/i.test(v.lang)});
+    if(!vs.length)return;
+    var cur=null;try{cur=localStorage.getItem('wh_vname')}catch(_){}
+    var sel=$('#asVoiceSel');sel.innerHTML='<option value="">Default voice</option>'+vs.map(function(v){return '<option value="'+esc(v.name)+'"'+(v.name===cur?' selected':'')+'>'+esc(v.name)+' ('+esc(v.lang)+')</option>'}).join('');
+    $('#asVoiceRow').hidden=false;
+  }
+  if('speechSynthesis' in window){fillVoices();speechSynthesis.onvoiceschanged=fillVoices;
+    $('#asVoiceSel').addEventListener('change',function(){try{localStorage.setItem('wh_vname',this.value)}catch(_){}voiceOn=true;try{localStorage.setItem('wh_voice','1')}catch(_){}paintVoice();speak('Hello, this is how I will sound.')});
+    $('#asRate').addEventListener('change',function(){speak('This is the speaking speed.')})}
   if(SR){
     mic.hidden=false;
     mic.addEventListener('click',function(){
